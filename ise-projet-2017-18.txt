@@ -1,0 +1,66 @@
+Présentation des projets
+
+A) Livrables
+
+A.1) Rapport préliminaire (Coef 1)
+  Format PDF via le dépôt de projet (se2-preliminaire au plus tard le 21/02).
+  Il faut faire le I, II, IV du plan et laisser le III vide.
+
+A.2) Rapport final (Coef 2)
+  Format PDF via le dépôt de projet (se2-final au plus tard le 28/02).
+  Il faut rendre le rapport complet: ajout du III et prise en
+  compte des remarques et de la correction pour les I, II et IV.
+
+A.3) Soutenance (Coef 3)
+  Démonstration du projet sur une machine de la salle 258 de l'école
+  le 22/03 (bonus) ou le 05/04.
+
+  Une machine virtuelle VirtualBox identique au système de la salle 258
+  est disponible sur http://lunix120.ensiie.fr/ise/ise-32-32
+
+B) Sujets
+
+Sujet 01: Sémaphore local
+  Mettre en place un système de sémaphores (P() V()) pour gérer des sections
+  critiques. La durée de vie de ces sémaphores est similaire à ceux des pipes:
+  Ils disparaissent dès que le processus qui les a créés et ses fils meurent.
+
+Sujet 02: Liens symboliques multiples sur répertoire (2012-13)
+  Implantation dans le VFS du fichier spécial LMD (Lien Multiple Sur Directory)
+  qui contient une liste de répertoires.
+  Ajouter un type de fichier étant une tâche trop complexe pour un projet,
+  on utilisera un fichier (lien ou normal) que l'on reconnaitra par son
+  nom "...".
+  Ainsi /gnu/bee/.../gnat/dog est le fichier dog dans le répertoire gnat d'un
+  des répertoires du fichier ... qui se trouve dans le répertoire /gun/bee.
+
+C) Rapport
+
+Le rapport ne doit pas être personnel. Il est conseillé de trouver
+un nom au projet afin de pouvoir le nommer tout au long du rapport.
+Le texte doit être publiable tel quel sur Internet.
+
+Plan indicatif:
+I) Introduction (1/2 à 1 page) :
+    On doit savoir lors d'un problème rencontré si le projet peut
+    résoudre notre problème ou non. C'est donc une présentation
+    très rapide mettant en avant les points forts.
+
+II) Manuel utilisateur
+    Elle doit expliquer comment utiliser le projet.
+    Elle doit contenir un tutoriel général avec exemple,
+    puis les pages de man des commandes et/ou fonctions et/ou
+    appels système.
+
+III) Implémentation (3 pages max.) :
+    On explique comment on a fait le projet.
+    On ne veut pas les détails de très bas niveau,
+    mais plutôt une explication haut niveau.
+
+IV) Recette (1-2 pages) :
+    Il faut décrire la démonstration que l'on va faire
+    lors de la soutenance finale.
+    On doit expliquer les commandes/le code et donner
+    les résultats escomptés.
+    Les tests doivent être présentés du plus simple au plus
+    compliqué.
