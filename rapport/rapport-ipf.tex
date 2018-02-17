@@ -11,7 +11,7 @@
 \usepackage{fancybox}
 
 \pagestyle{plain}
-\title{Rapport}
+\title{Sémaphore local}
 \date{21 février 2018}
 \begin{document}
 \maketitle
@@ -19,15 +19,67 @@
 \tableofcontents
 \newpage
 \section{Introduction}
-	 
+    \textit{Cinq philosophes se trouvent autour d'une table avec en face d'eux un plat de spaghetti et à gauche de chaque plat se trouve un couvert (une fourchette ou un couteau).
+    Un philosophe ne possède que trois états :}
+    \begin{itemize}
+        \item \textit{penser pendant un temps indéterminé}
+        \item \textit{être affamé pendant un temps déterminé et fini}
+        \item \textit{manger pendant un temps déterminé et fini.}
+    \end{itemize}
+
+    \textit{Cependant, quand un philosophe a faim, il se met en état "affamé" et va attendre que les couverts autour de son assiette soient libres pour pouvoir manger.
+    Et dans le cas ou l'un des deux couverts n'est pas libre, le philosophe se met en état de famine pendant un temps déterminé en attendant de revérifier.}\\
+    
+    Cette situation représente en réalité le problème du "dîner des philosophes" énoncé par Dijkstra. \\
+    
+    Le but de ce sujet est d'implémenter un système de sémaphore afin de gérer des sections critiques et ainsi répondre au problème ci-dessus.
+
 
 \newpage
 \section{Manuel d'utilisation}
+    \subsection{Tutoriel d'utilisation}
+    \newpage
+    \subsection{initialize}
+        \paragraph{Nom\\}
+        sem\_initialize - Initialise un sémaphore
+        \paragraph{Synopsis\\}
+        \textbf{\#include <sem.h>}
+
+        \textbf{int sem\_initialize(sem *}\textit{sem}\textbf{, int }\textit{value}\textbf{)}
+        \paragraph{Description\\}
+        \textbf{sem\_initialize}() alloue et initialise \textit{sem} avec \textit{value} comme valeur initiale. \textit{value} doit être supérieur ou égale à 0.
+
+        \paragraph{Valeur renvoyée\\}
+        \textbf{sem\_initialize}() renvoie 0 dans le cas où le sémaphore a bien été créé, -1 si une erreur a été levé.
+        \paragraph{Erreurs\\}
+        EFAULT : \textit{value} est strictement inférieur à 0.
+    \newpage
+    \subsection{acquire}
+        \paragraph{Nom}
+        \paragraph{Synopsis}
+        \paragraph{Description}
+        \paragraph{Valeur renvoyée}
+        \paragraph{Erreurs}
+
+    \newpage
+    \subsection{release}
+        \paragraph{Nom}
+        \paragraph{Synopsis}
+        \paragraph{Description}
+        \paragraph{Valeur renvoyée}
+        \paragraph{Erreurs}
+    \newpage
+    \subsection{destroy}
+        \paragraph{Nom}
+        \paragraph{Synopsis}
+        \paragraph{Description}
+        \paragraph{Valeur renvoyée}
+        \paragraph{Erreurs}
+    \newpage
 
 \section{Implémentation}
 
 \section{Recette}
 		
-\section{Conclusion}
 
 \end{document}
