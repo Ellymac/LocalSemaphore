@@ -56,30 +56,54 @@
         EFAULT : \textit{value} est strictement inférieur à 0.
     \newpage
     \subsection{acquire}
-        \paragraph{Nom}
-        \paragraph{Synopsis}
-        \paragraph{Description}
-        \paragraph{Valeur renvoyée}
-        \paragraph{Erreurs}
+        \paragraph{Nom\\}
+        sem\_acquire - Décrémente la valeur du sémaphore
+        \paragraph{Synopsis\\}
+        \textbf{\#include <sem.h>}
+
+        \textbf{int sem\_acquire(sem *}\textit{sem}\textbf{)}
+        \paragraph{Description\\}
+        \textbf{sem\_acquire}() décrémente la valeur du sémaphore \textit{sem}. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
+
+        \paragraph{Valeur renvoyée\\}
+        \textbf{sem\_acquire}() renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
+        \paragraph{Erreurs\\}
+        ?
 
     \newpage
     \subsection{release}
-        \paragraph{Nom}
-        \paragraph{Synopsis}
-        \paragraph{Description}
-        \paragraph{Valeur renvoyée}
-        \paragraph{Erreurs}
+        \paragraph{Nom\\}
+        sem\_release - Incrémente la valeur du sémaphore
+        \paragraph{Synopsis\\}
+        \textbf{\#include <sem.h>}
+
+        \textbf{int sem\_release(sem *}\textit{sem}\textbf{)}
+        \paragraph{Description\\}
+        \textbf{sem\_release}() incrémente la valeur du sémaphore \textit{sem}. Dans le cas où la file associée à \textit{sem} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
+
+        \paragraph{Valeur renvoyée\\}
+        \textbf{sem\_release}() renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
+        \paragraph{Erreurs\\}
+        ?
     \newpage
     \subsection{destroy}
-        \paragraph{Nom}
-        \paragraph{Synopsis}
-        \paragraph{Description}
-        \paragraph{Valeur renvoyée}
-        \paragraph{Erreurs}
+        \paragraph{Nom\\}
+        sem\_destroy - Détruit le sémaphore
+        \paragraph{Synopsis\\}
+        \textbf{\#include <sem.h>}
+
+        \textbf{int sem\_destroy(sem *}\textit{sem}\textbf{)}
+        \paragraph{Description\\}
+        \textbf{sem\_destroy}() détruit le sémaphore \textit{sem} et désalloue la file d'attente.
+
+        \paragraph{Valeur renvoyée\\}
+        \textbf{sem\_destroy}() renvoie 0 dans le cas où le sémaphore a bien été détruit, -1 si une erreur a été levé.
+        \paragraph{Erreurs\\}
+        ?
     \newpage
 
 \section{Implémentation}
-
+\newpage
 \section{Recette}
 		
 
