@@ -1,8 +1,8 @@
 \documentclass[12pt]{article}
 
 \usepackage[sfdefault]{ClearSans}
-\usepackage[utf8]{inputenc} 
-\usepackage[T1]{fontenc}     
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage{color}
 \usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
@@ -20,7 +20,7 @@
 \tableofcontents
 \newpage
 \section{Introduction}
-    \textit{Cinq philosophes se trouvent autour d'une table avec en face d'eux un plat de spaghetti et à gauche de chaque plat se trouve un couvert (une fourchette ou un couteau).
+    \textit{Cinq philosophes se trouvent autour d'une table avec en face d'eux un plat de spaghettis et à gauche de chaque plat se trouve un couvert (une fourchette ou un couteau).
     Un philosophe ne possède que trois états :}
     \begin{itemize}
         \item \textit{penser pendant un temps indéterminé}
@@ -28,12 +28,23 @@
         \item \textit{manger pendant un temps déterminé et fini.}
     \end{itemize}
 
-    \textit{Cependant, quand un philosophe a faim, il se met en état "affamé" et va attendre que les couverts autour de son assiette soient libres pour pouvoir manger.
-    Et dans le cas ou l'un des deux couverts n'est pas libre, le philosophe se met en état de famine pendant un temps déterminé en attendant de revérifier.}\\
-    
-    Cette situation représente en réalité le problème du "dîner des philosophes" énoncé par Dijkstra. \\
-    
-    Le but de ce sujet est d'implémenter un système de sémaphore afin de gérer des sections critiques et ainsi répondre au problème ci-dessus.
+    \textit{Quand un philosophe a faim, il se met en état "affamé" et va attendre que les couverts situés de chaque côté de son assiette soient libres pour pouvoir manger.
+    Dans le cas ou l'un des deux couverts n'est pas libre, le philosophe se met en état de famine pendant un temps déterminé avant de revérifier leur disponibilité.}
+
+    Cette situation représente en réalité le problème du "dîner des philosophes" énoncé par Dijkstra. \\ \\
+
+    En informatique, lorsque deux programmes exécutés en parallèle souhaitent accéder à la même donnée au même moment, cela peut créer des conflits, notamment si l'un des deux modifie la donnée. \\
+
+    Le problème des lecteurs et des rédacteurs énoncé par Dijkstra illustre bien la situation :
+
+    \textit{Soit une base de données pouvant être accédée par des lecteurs qui vont simplement consulter les données, et des rédacteurs qui vont les modifier.
+    Les contraintes sont les suivantes :}
+    \begin{itemize}
+      \item \textit{Plusieurs lecteurs peuvent accéder en même temps à la base de données.}
+      \item \textit{Lorsqu'un rédacteur modifie la base de donnée, personne d'autre ne peut y accéder (ni les lecteurs, ni un autre rédacteur).} \\
+    \end{itemize}
+
+    L'implémentation d'un système de sémaphores afin de gérer des sections critiques va permettre de répondre au problème ci-dessus. En effet, le sémaphore va agir comme un verrou et mettre en attente des programmes ou threads s'ils souhaitent accéder à une section critique en cours d'utilisation par un ou plusieurs autres programmes ou threads.
 
 
 \newpage
@@ -105,6 +116,34 @@
 \section{Implémentation}
 \newpage
 \section{Recette}
-		
+L'implémentation d'un sémaphore local sera testée par des programmes C. Nous allons écrire trois programmes afin de tester le sémaphore de différentes manières.
+\subsection{Premier programme de test}
+  \paragraph{Objectif\\}
+  Dans ce premier programme, les sémaphores vont agir comme des mutex (initialisés à 1). L'objectif est à partir de deux threads de naviguer entre deux sections critiques l'une après l'autre.
+  \paragraph{Implémentation\\}
+  Deux threads \textit{tPing} et \textit{tPong} seront lancés. Il y aura deux sections critiques contenant chacune un affichage à l'écran indiquant la section critique dans laquelle le thread se situe ("ping" ou "pong"). \\
+  Le sémaphore \textit{pong} sera initialisé à 0 pour commencer par l'affichage de "ping". Le sémaphore \textit{ping} sera ainsi initialisé à 1.
+  \paragraph{Résultat attendu\\}
+  Le résultat attendu lors du lancement de ce programme C est un affichage sur la console d'une suite de "ping pong ping pong...".
+\newpage
+\subsection{Deuxième programme de test}
+  \paragraph{Objectif\\}
+  Dans le deuxième programme de test, les sémaphores seront utilisés pour permettre de résoudre le problème des lecteurs et rédacteurs énoncé en introduction.
+  \paragraph{Implémentation\\}
+  \paragraph{Résultat attendu\\}
+  Le résultat attendu lors du lancement de ce programme C est :
+  \begin{itemize}
+    \item Lorsqu'un lecteur accède à la base de données, on l'affiche sur la console avec le nombre total actuel de lecteurs. De même lorsqu'un lecteur quitte la base de données.
+    \item Lorsqu'un rédacteur accède à la base de données, on l'affiche sur la console. De même lorsque le rédacteur quitte la base de données.
+  \end{itemize}
+\newpage
+\subsection{Troisième programme de test}
+  \paragraph{Objectif\\}
+  \paragraph{Implémentation\\}
+  \paragraph{Résultat attendu\\}
+
+
+
+
 
 \end{document}
