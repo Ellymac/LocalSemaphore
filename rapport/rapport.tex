@@ -9,6 +9,32 @@
 \usepackage{eurosym}
 \usepackage{graphicx}
 \usepackage{fancybox}
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\color{codegray},
+    stringstyle=\color{codepurple},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=3pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \pagestyle{plain}
 \title{Sémaphore local}
@@ -22,84 +48,156 @@
 \section{Introduction}
     En informatique, lorsque deux programmes exécutés en parallèle souhaitent accéder à la même donnée au même moment, cela peut créer des conflits, notamment si l'un des deux modifie la donnée. \\
 
-    Le problème des lecteurs et des rédacteurs énoncé par Dijkstra illustre bien la situation :
+    \textit{\textbf{LocalSemaphores}} permet l'implémentation d'un système de sémaphores inter processus hérités par les fils d'un processus afin de gérer des sections critiques.
 
-    \textit{Soit une base de données pouvant être accédée par des lecteurs qui vont simplement consulter les données, et des rédacteurs qui vont les modifier. \\
-    Les contraintes sont les suivantes :}
-    \begin{itemize}
-      \item \textit{Plusieurs lecteurs peuvent accéder en même temps à la base de données.}
-      \item \textit{Lorsqu'un rédacteur modifie la base de donnée, personne d'autre ne peut y accéder (ni les lecteurs, ni un autre rédacteur).} \\
-    \end{itemize}
+    Les sémaphores peuvent être initialisés avec un nombre de ressources donné (fonction \textit{sem\_initialize(int nb)}), et gèrent ensuite l'allocation des ressources et la file d'attente des processus bloqués grâce aux fonctions \textit{sem\_acquire(int sid)} et \textit{sem\_release(int sid)}. La fonction \textit{sem\_destroy(int sid)} permet de détruire un sémaphore et de désallouer la file d'attente associée à ce dernier.
 
-    L'implémentation d'un système de sémaphores afin de gérer des sections critiques va permettre de répondre au problème ci-dessus. En effet, le sémaphore va agir comme un verrou et mettre en attente des programmes ou threads s'ils souhaitent accéder à une section critique en cours d'utilisation par un ou plusieurs autres programmes ou threads.
-
+    Un sémaphore est détruit lorsque le processus qui l'a créé ainsi que tous ses fils meurent. Sa non-rémanence lui permet ainsi d'être plus efficace que les IPC (Inter Processus Communication) utilisés habituellement sous linux.
 
 \newpage
 \section{Manuel d'utilisation}
-    \subsection{Tutoriel d'utilisation}
+    \subsection{Appels systèmes}
+      \subsubsection{initialize}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_initialize(int }\textit{nb}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_initialize}() alloue et initialise un sémaphore avec \textit{nb} comme valeur initiale. \\ \textit{nb} représente le nombre de ressources disponibles. Cette valeur doit être supérieure ou égale à 0, elle vaut 1 par défaut.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_initialize}() renvoie l'id du sémaphore dans le cas où celui-ci a bien été créé, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite. \\
+          EFAULT : lorsque la valeur passée en argument est invalide (\textit{nb} < 0 ou \textit{nb} > MAX\_INT). \\
+          ETOOMANY : lorsqu'on a atteint le nombre limite de sémaphores par processus. \\
+      \newpage
+      \subsubsection{acquire}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_acquire(int }\textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_acquire} décrémente la valeur du sémaphore d'id \textit{sid} si le nombre de ressources disponibles est non nul. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_acquire} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite.
+
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+      \newpage
+      \subsubsection{release}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_release(int }\textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_release} incrémente le nombre de ressources disponibles du sémaphore d'id \textit{sid}. Dans le cas où la file associée à \textit{sid} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
+
+          \textbf{sem\_release} ne peut être appelé que quand au moins une ressource est utilisée.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_release} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite.
+
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+      \newpage
+      \subsubsection{destroy}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_destroy(int} \textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_destroy} détruit le sémaphore d'id \textit{sid} et désalloue la file d'attente.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_destroy} renvoie 0 dans le cas où le sémaphore a bien été détruit, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+        \newpage
+        \subsubsection{debug}
+            \paragraph{Nom\\}
+            \textbf{\#include <sem.h>}
+
+            \textbf{int sem\_debug(int} \textit{sid}\textbf{, int* }\textit{v}\textbf{, int* }\textit{pids}\textbf{, [int }\textit{pidSize}\textbf{], int }\textit{compteurDeReference}\textbf{)}
+            \paragraph{Description\\}
+            \textbf{sem\_debug} permet de connaître le nombre de processus dans la file d'attente du sémaphore d'id \textit{sid}, utile lors d'un debug.
+
+            \textit{v} représente le nombre de ressources, \textit{pids} représente les processus dans la file d'attente, \textit{pidSize} représente la taille du tableau \textit{pids}.
+
+            \paragraph{Valeur renvoyée\\}
+            \textbf{sem\_debug} renvoie le nombre de processus dans la file d'attente du sémaphore d'id \textit{sid}, -1 si une erreur a été levée.
+            \paragraph{Erreurs\\}
+            EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
     \newpage
-    \subsection{initialize}
-        \paragraph{Nom\\}
-        \textbf{\#include <sem.h>}
+    \subsection{Exemple}
+    \begin{lstlisting}[language=C]
+    int main(int argc, char* argv) {
+      int s1, s2, p1, p2, status, pid1, pid2;
 
-        \textbf{int sem\_initialize(int }\textit{nb}\textbf{)}
-        \paragraph{Description\\}
-        \textbf{sem\_initialize}() alloue et initialise un sémaphore avec \textit{nb} comme valeur initiale. \\ \textit{nb} représente le nombre de ressources disponibles. Cette valeur doit être supérieure ou égale à 0, elle vaut 1 par défaut.
+      // init semaphores
+      if(s1 = sem_initialize() == -1) {
+        perror("sem_initialize");
+        exit(1);
+      }
+      if(s2 = sem_initialize() == -1) {
+        perror("sem_initialize");
+        exit(1);
+      }
 
-        \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_initialize}() renvoie l'id du sémaphore dans le cas où celui-ci a bien été créé, -1 si une erreur a été levée.
-        \paragraph{Erreurs\\}
-        ENOMEM : lorsque l'allocation ne s'est pas faite. \\
-        EFAULT : lorsque la valeur passée en argument est invalide (\textit{nb} < 0 ou \textit{nb} > MAX\_INT). \\
-        ETOOMANY : lorsqu'on a atteint le nombre limite de sémaphores par processus. \\
-    \newpage
-    \subsection{acquire}
-        \paragraph{Nom\\}
-        \textbf{\#include <sem.h>}
+      // acquire semaphores : les prochains sem_acquire seront bloques
+      if(p1 = sem_acquire(s1) == -1) {
+        perror("sem_acquire");
+        exit(1);
+      }
+      if(p2 = sem_acquire(s2) == -1) {
+        perror("sem_acquire");
+        exit(1);
+      }
 
-        \textbf{int sem\_acquire(int }\textit{sid}\textbf{)}
-        \paragraph{Description\\}
-        \textbf{sem\_acquire} décrémente la valeur du sémaphore d'id \textit{sid} si le nombre de ressources disponibles est non nul. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
+      // fork pour creer fils 1 et fils 2
+      if(pid1 = fork() == -1) {
+        perror("fork");
+        exit(1);
+      } else {
+        // fils 1
+        sem_acquire(s1);
+        write(1,"fils 1",6);
+        sem_release(s1);
+        exit(0);
+      }
+      if(pid2 = fork() == -1) {
+        perror("fork");
+        exit(1);
+      } else {
+        // fils 2
+        sem_acquire(s2);
+        write(1,"fils 2",6);
+        sem_release(s2);
+        exit(0);
+      }
 
-        \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_acquire} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
-        \paragraph{Erreurs\\}
-        ENOMEM : lorsque l'allocation ne s'est pas faite.
+      // pere
+      if(pid1 >= 1) {
+        sem_release(s1);
+        wait(&status); // on attend la fin du fils 1
+        sem_release(s2); // on reveille le fils 2
+        wait(&status);
+      }
+      else if(pid2 >= 1){
+        sem_release(s2);
+        wait(&status); // on attend la fin du fils 2
+        sem_release(s1); // on reveille le fils 1
+        wait(&status);
+      }
+      write(1,"\n",1);
+      return 0;
+    }
+    \end{lstlisting}
 
-        EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
-
-    \newpage
-    \subsection{release}
-        \paragraph{Nom\\}
-        \textbf{\#include <sem.h>}
-
-        \textbf{int sem\_release(int }\textit{sid}\textbf{)}
-        \paragraph{Description\\}
-        \textbf{sem\_release} incrémente le nombre de ressources disponibles du sémaphore d'id \textit{sid}. Dans le cas où la file associée à \textit{sid} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
-
-        \textbf{sem\_release} ne peut être appelé que quand au moins une ressource est utilisée.
-
-        \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_release}renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
-        \paragraph{Erreurs\\}
-        ?
-    \newpage
-    \subsection{destroy}
-        \paragraph{Nom\\}
-        sem\_destroy - Détruit le sémaphore
-        \paragraph{Synopsis\\}
-        \textbf{\#include <sem.h>}
-
-        \textbf{int sem\_destroy(sem *}\textit{sem}\textbf{)}
-        \paragraph{Description\\}
-        \textbf{sem\_destroy}() détruit le sémaphore \textit{sem} et désalloue la file d'attente.
-
-        \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_destroy}() renvoie 0 dans le cas où le sémaphore a bien été détruit, -1 si une erreur a été levé.
-        \paragraph{Erreurs\\}
-        ?
-    \newpage
-
+\newpage
 \section{Implémentation}
 \newpage
 \section{Recette}
