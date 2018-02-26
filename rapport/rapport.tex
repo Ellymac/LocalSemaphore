@@ -40,47 +40,47 @@
     \newpage
     \subsection{initialize}
         \paragraph{Nom\\}
-        sem\_initialize - Initialise un sémaphore
-        \paragraph{Synopsis\\}
         \textbf{\#include <sem.h>}
 
-        \textbf{int sem\_initialize(sem *}\textit{sem}\textbf{, int }\textit{value}\textbf{)}
+        \textbf{int sem\_initialize(int }\textit{nb}\textbf{)}
         \paragraph{Description\\}
-        \textbf{sem\_initialize}() alloue et initialise \textit{sem} avec \textit{value} comme valeur initiale. \textit{value} doit être supérieur ou égale à 0.
+        \textbf{sem\_initialize}() alloue et initialise un sémaphore avec \textit{nb} comme valeur initiale. \\ \textit{nb} représente le nombre de ressources disponibles. Cette valeur doit être supérieure ou égale à 0, elle vaut 1 par défaut.
 
         \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_initialize}() renvoie 0 dans le cas où le sémaphore a bien été créé, -1 si une erreur a été levé.
+        \textbf{sem\_initialize}() renvoie l'id du sémaphore dans le cas où celui-ci a bien été créé, -1 si une erreur a été levée.
         \paragraph{Erreurs\\}
-        EFAULT : \textit{value} est strictement inférieur à 0.
+        ENOMEM : lorsque l'allocation ne s'est pas faite. \\
+        EFAULT : lorsque la valeur passée en argument est invalide (\textit{nb} < 0 ou \textit{nb} > MAX\_INT). \\
+        ETOOMANY : lorsqu'on a atteint le nombre limite de sémaphores par processus. \\
     \newpage
     \subsection{acquire}
         \paragraph{Nom\\}
-        sem\_acquire - Décrémente la valeur du sémaphore
-        \paragraph{Synopsis\\}
         \textbf{\#include <sem.h>}
 
-        \textbf{int sem\_acquire(sem *}\textit{sem}\textbf{)}
+        \textbf{int sem\_acquire(int }\textit{sid}\textbf{)}
         \paragraph{Description\\}
-        \textbf{sem\_acquire}() décrémente la valeur du sémaphore \textit{sem}. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
+        \textbf{sem\_acquire} décrémente la valeur du sémaphore d'id \textit{sid} si le nombre de ressources disponibles est non nul. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
 
         \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_acquire}() renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
+        \textbf{sem\_acquire} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
         \paragraph{Erreurs\\}
-        ?
+        ENOMEM : lorsque l'allocation ne s'est pas faite.
+
+        EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
 
     \newpage
     \subsection{release}
         \paragraph{Nom\\}
-        sem\_release - Incrémente la valeur du sémaphore
-        \paragraph{Synopsis\\}
         \textbf{\#include <sem.h>}
 
-        \textbf{int sem\_release(sem *}\textit{sem}\textbf{)}
+        \textbf{int sem\_release(int }\textit{sid}\textbf{)}
         \paragraph{Description\\}
-        \textbf{sem\_release}() incrémente la valeur du sémaphore \textit{sem}. Dans le cas où la file associée à \textit{sem} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
+        \textbf{sem\_release} incrémente le nombre de ressources disponibles du sémaphore d'id \textit{sid}. Dans le cas où la file associée à \textit{sid} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
+
+        \textbf{sem\_release} ne peut être appelé que quand au moins une ressource est utilisée.
 
         \paragraph{Valeur renvoyée\\}
-        \textbf{sem\_release}() renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
+        \textbf{sem\_release}renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levé.
         \paragraph{Erreurs\\}
         ?
     \newpage

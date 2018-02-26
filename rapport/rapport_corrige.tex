@@ -33,12 +33,12 @@
 \newpage
 \section{Manuel d'utilisation}
   \subsection{Appels système}
-      \textbf{int ss_create([int nbr])}  soit nb de ressources en argument, soit rien et égal à 1 par défaut \\
+      \textbf{int ss\_create([int nbr])}  soit nb de ressources en argument, soit rien et égal à 1 par défaut \\
       \paragraph{Description\\}
-      Crée un identifiant de sémaphore utilisable par les autres fonctions ss_P, ss_V et éventuellement ss_delete. \\
+      Crée un identifiant de sémaphore utilisable par les autres fonctions ss\_P, ss\_V et éventuellement ss\_delete. \\
       \begin{itemize}
         \item L'id des sémaphores est hérité par tous les fils du processus
-        \item Le sémaphore est détruit quand tous les processus qui le possèdent sont morts [ ou lorsqu'on fait un ss_delete()]
+        \item Le sémaphore est détruit quand tous les processus qui le possèdent sont morts [ ou lorsqu'on fait un ss\_delete()]
       \end{itemize}
       \paragraph{Retour\\}
       Renvoie l'id du sem en cas de succès, sinon -1.
@@ -48,9 +48,9 @@
       EVAL : lq le nbr en argument est invalide (négatif, ou trop grand) (cf /usr/include/errno.h un truc comme ça) \\
 
       \newpage
-      \textbf{int ss_P(int sid)} \\
+      \textbf{int ss\_P(int sid)} \\
       \paragraph{Description\\}
-      ss_P décrémente le nb de ressources si le nb de ressources disponibles est non nul ; il bloque le processus si le nb de ressources disponibles est nul et l'enfile dans une file d'attente.
+      ss\_P décrémente le nb de ressources si le nb de ressources disponibles est non nul ; il bloque le processus si le nb de ressources disponibles est nul et l'enfile dans une file d'attente.
       \paragraph{Retour\\}
       Renvoie 0 en cas de succès et -1 en cas d'erreur.
       \paragraph{Erreurs\\}
@@ -58,9 +58,9 @@
       EVAL : si le sid ne correspond pas à un sémaphore créé \\
 
       \newpage
-      \textbf{int ss_V(int sid)} \\
+      \textbf{int ss\_V(int sid)} \\
       \paragraph{Description\\}
-      ss_V incrémente le nb de ressources, réveille et retire le 1er processus dans la file d'attente s'il existe. ss_V ne peut être appelé que quand au moins une ressource est utilisée ( un ss_V ferme un ss_P ).
+      ss\_V incrémente le nb de ressources, réveille et retire le 1er processus dans la file d'attente s'il existe. ss\_V ne peut être appelé que quand au moins une ressource est utilisée ( un ss\_V ferme un ss\_P ).
       \paragraph{Retour\\}
       Renvoie 0 en cas de succès et -1 en cas d'erreur.
       \paragraph{Erreurs\\}
@@ -68,14 +68,14 @@
       EVAL : si le sid ne correspond pas à un sémaphore créé \\
 
       \newpage
-      \textbf{int ss_delete(int sid)} \\
+      \textbf{int ss\_delete(int sid)} \\
       \paragraph{Description\\}
       Supprime le sem pour le processus sid \\
 
       \newpage
-      \textbf{int ss_dbg(int sid, int* v, int* pids,[ int pidSize ], int compteurDeReference)} avec sid le sem, v le nb de ressources, pids les processus dans la file d'attente, pidSize la taille du tableau pids, compteurDeReference ??
+      \textbf{int ss\_dbg(int sid, int* v, int* pids,[ int pidSize ], int compteurDeReference)} avec sid le sem, v le nb de ressources, pids les processus dans la file d'attente, pidSize la taille du tableau pids, compteurDeReference ??
       \paragraph{Description\\}
-      ss_dbg va renvoyer le nb de processus dans la file d'attente (avec max pidSize, sinon 10 par défaut)
+      ss\_dbg va renvoyer le nb de processus dans la file d'attente (avec max pidSize, sinon 10 par défaut)
       \paragraph{Erreurs\\}
       EFAULT : sid et pid valides \\
       ... \\
@@ -85,35 +85,35 @@
       \begin{lstlisting}
       int main(int argc, char* argv) {
         int S1, S2;
-        if(S1 = ss_create() == -1) {
+        if(S1 = ss\_create() == -1) {
           blabla
         }
-        if(S2 = ss_create() == -1) {
+        if(S2 = ss\_create() == -1) {
           blabla
         }
-        ss_P(S1); ss_P(S2); // prochains ss_P vont être bloqués, tester si = -1
+        ss\_P(S1); ss\_P(S2); // prochains ss\_P vont être bloqués, tester si = -1
 
         if(fork() == 0) {
           // fils 1
-          ss_P(S1);
+          ss\_P(S1);
           write(1,"fils 1",7);
-          ss_V(S1);
+          ss\_V(S1);
           exit(0);
         }
         if(fork() == 0) {
           // fils 2
-          ss_P(S2);
+          ss\_P(S2);
           write(1,"fils 2",7);
-          ss_V(S2);
+          ss\_V(S2);
           exit(0);
         }
         // pere
         if(argc >= 1) {
-          ss_V(S2);
+          ss\_V(S2);
           wait(&status); // on attend la fin du fils 2
-          ss_V(S1); // on réveille le fils 1
+          ss\_V(S1); // on réveille le fils 1
           wait(&status);
-          // on peut refaire 2 ss_P pour vérifier ici
+          // on peut refaire 2 ss\_P pour vérifier ici
         }
         else {
           idem mais inversé
@@ -126,37 +126,37 @@
 \newpage
 \section{Implémentation}
 Dans la struct task : ajouter un champ qui correspond aux sémaphores (ss) du processus. \\
-ss_create va ajouter un sémaphore dans ce champ, ss_delete va le supprimer. \\
+ss\_create va ajouter un sémaphore dans ce champ, ss\_delete va le supprimer. \\
 Dans exit(), delete le champ ss s'il n'est pas nul. \\
-Dans do_clone(), recopier au sens large la structure (champ) ss dans le fils.
+Dans do\_clone(), recopier au sens large la structure (champ) ss dans le fils.
 
 \newpage
 \section{Recette}
 \paragraph{Création d'un sémaphore}
 \begin{itemize}
-  \item ss_create
-  \item ss_dbg
-  \item ss_P()
-  \item ss_dbg : la ressource doit être bloquée
-  \item ss_V()
-  \item ss_dbg : la ressource doit être libérée
-  \item ss_del
-  \item ss_dbg : erreur car le sem n'existe plus
+  \item ss\_create
+  \item ss\_dbg
+  \item ss\_P()
+  \item ss\_dbg : la ressource doit être bloquée
+  \item ss\_V()
+  \item ss\_dbg : la ressource doit être libérée
+  \item ss\_del
+  \item ss\_dbg : erreur car le sem n'existe plus
 \end{itemize}
 
 \paragraph{Exemple avec un fils}
-Trouver un scénario, ajouter des ss_dbg dans le fils : \\
+Trouver un scénario, ajouter des ss\_dbg dans le fils : \\
 On fait
 \begin{itemize}
-  \item ss_P dans le père
-  \item ss_dbg dans le père
+  \item ss\_P dans le père
+  \item ss\_dbg dans le père
   \item wait dans le père pour attendre la mort du fils
-  \item ss_dbg dans le fils
-  \item ss_P dans le fils : ça doit être bloqué (tout)
+  \item ss\_dbg dans le fils
+  \item ss\_P dans le fils : ça doit être bloqué (tout)
 \end{itemize}
 
 \paragraph{Exemple avec un fils pas coincé}
-Trouver un scénario, ajouter des ss_dbg dans le fils. On peut regarder dans le fils si le père est bien dans ss_dbg quand on a un ss_P dans le père. Le fils visualise la file d'attente, voit le père. Si possible l'enlever de la file d'attente et revérifier.
+Trouver un scénario, ajouter des ss\_dbg dans le fils. On peut regarder dans le fils si le père est bien dans ss\_dbg quand on a un ss\_P dans le père. Le fils visualise la file d'attente, voit le père. Si possible l'enlever de la file d'attente et revérifier.
 
 \paragraph{Gros exemple}
 Ecriture d'une variable partagée par plusieurs processus. Par ex 4 processus père/fils, 2 qui incrémentent 1000 fois et 2 qui décrémentent 1000 fois une même variable. A la fin, la variable doit être égale à sa valeur initiale.
