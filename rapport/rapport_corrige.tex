@@ -161,4 +161,39 @@ Trouver un scénario, ajouter des ss\_dbg dans le fils. On peut regarder dans le
 \paragraph{Gros exemple}
 Ecriture d'une variable partagée par plusieurs processus. Par ex 4 processus père/fils, 2 qui incrémentent 1000 fois et 2 qui décrémentent 1000 fois une même variable. A la fin, la variable doit être égale à sa valeur initiale.
 
+
+\newpage
+\subsection{Deuxième programme de test}
+\paragraph{Objectif\\}
+Dans ce premier programme, les sémaphores vont agir comme des mutex (initialisés à 1). L'objectif est à partir de deux threads de naviguer entre deux sections critiques l'une après l'autre.
+\paragraph{Implémentation\\}
+Deux threads \textit{tPing} et \textit{tPong} seront lancés. Il y aura deux sections critiques contenant chacune un affichage à l'écran indiquant la section critique dans laquelle le thread se situe ("ping" ou "pong"). \\
+Le sémaphore \textit{semPong} sera initialisé à 0 pour commencer par l'affichage de "ping". Le sémaphore \textit{semPing} sera ainsi initialisé à 1.
+\paragraph{Résultat attendu\\}
+Le résultat attendu lors du lancement de ce programme C est un affichage sur la console d'une suite de "ping pong ping pong...".
+\newpage
+\subsection{Deuxième programme de test}
+\paragraph{Objectif\\}
+Dans le deuxième programme de test, les sémaphores seront utilisés pour permettre de résoudre le problème des lecteurs et rédacteurs énoncé en introduction.
+\paragraph{Implémentation\\}
+Nous décidons ici de donner la priorité aux lecteurs. Un lecteur pourra donc accéder à la base de données s'il n'y a aucun rédacteur en cours d'écriture. Un rédacteur pourra y accéder s'il n'y a aucun autre rédacteur en cours d'écriture, aucun lecteur en cours de lecture et aucun lecteur dans la file d'attente. \\
+Trois sémaphores sont nécessaires :
+\begin{itemize}
+  \item Un sémaphore \textit{semLecteurs} qui protégera l'accès à la variable \textit{nbLecteurs} indiquant le nombre de lecteurs actuellement sur la base de données.
+  \item Un sémaphore \textit{semRedacteurs} empêchant l'accès à la base de données aux autres rédacteurs lorsqu'un rédacteur y accède.
+  \item Un sémaphore \textit{redacteur} qui permet au premier lecteur de bloquer l'accès aux rédacteurs et au rédacteur accédant à la ressource de bloquer l'accès aux lecteurs pendant la rédaction.
+\end{itemize}
+On aura ensuite 4 fonctions définissant les 4 actions possibles :
+\begin{itemize}
+  \item \textit{startRead()} permettra d'incrémenter la variable \textit{nbLecteurs}. Si celle-ci est égale à 1 (premier lecteur), on lancera \textit{redacteur.acquire()} pour empêcher aux rédacteur d'accéder à la ressource.
+  \item \textit{endRead()} décrémentera la variable \textit{nbLecteurs}. Si celle-ci est égale à 0 (plus aucun lecteur), on lancera \textit{redacteur.release()} pour permettre à un éventuel rédacteur de commencer la rédaction (on va le débloquer s'il était en file d'attente).
+  \item \textit{startWrite()} bloquera l'accès à la ressource aux autres rédacteurs ainsi qu'aux lecteurs en faisant \textit{semRedacteurs.acquire()} et \textit{redacteur.acquire()}.
+  \item \textit{endWrite()} autorisera à nouveau l'accès à la ressource, en priorisant les lecteurs car on fera en premier \textit{redacteur.release()} (libération éventuelle d'un lecteur en attente) puis \textit{semRedacteurs.release()}.
+\end{itemize}
+\paragraph{Résultat attendu\\}
+Le résultat attendu lors du lancement de ce programme C est :
+\begin{itemize}
+  \item Lorsqu'un lecteur accède à la base de données, on l'affiche sur la console avec le nombre total actuel de lecteurs. De même lorsqu'un lecteur quitte la base de données.
+  \item Lorsqu'un rédacteur accède à la base de données, on l'affiche sur la console. De même lorsque le rédacteur quitte la base de données.
+\end{itemize}
 \end{document}
