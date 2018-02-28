@@ -1,0 +1,8 @@
+# LaTex
+
+rapport/*.aux
+rapport/*.fdb_latexmk
+rapport/*.fls
+rapport/*.log
+rapport/*.synctex.gz
+rapport/*.toc

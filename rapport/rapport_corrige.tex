@@ -1,0 +1,199 @@
+\documentclass[12pt]{article}
+
+\usepackage[sfdefault]{ClearSans}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+\usepackage{color}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{eurosym}
+\usepackage{graphicx}
+\usepackage{fancybox}
+\usepackage{listings}
+
+\pagestyle{plain}
+\title{Sémaphore local}
+\author{Anthony Araye et Camille Schnell}
+\date{21 février 2018}
+\begin{document}
+\maketitle
+\renewcommand{\contentsname}{Sommaire}
+\tableofcontents
+\newpage
+\section{Introduction}
+  \begin{itemize}
+    \item Création de sémaphores inter processus et hérités par les fils d'un processus.
+    \item Utilisation simple :
+    \begin{itemize}
+      \item juste la fonctionnalité des sem P et V
+      \item non rémanents, ils disparaissent quand les processus meurent (contrairement aux IPC)
+      \item plus efficace que les IPC
+    \end{itemize}
+  \end{itemize}
+\newpage
+\section{Manuel d'utilisation}
+  \subsection{Appels système}
+      \textbf{int ss\_create([int nbr])}  soit nb de ressources en argument, soit rien et égal à 1 par défaut \\
+      \paragraph{Description\\}
+      Crée un identifiant de sémaphore utilisable par les autres fonctions ss\_P, ss\_V et éventuellement ss\_delete. \\
+      \begin{itemize}
+        \item L'id des sémaphores est hérité par tous les fils du processus
+        \item Le sémaphore est détruit quand tous les processus qui le possèdent sont morts [ ou lorsqu'on fait un ss\_delete()]
+      \end{itemize}
+      \paragraph{Retour\\}
+      Renvoie l'id du sem en cas de succès, sinon -1.
+      \paragraph{Erreurs\\}
+      ENOMEM : quand l'allocation ne s'est pas faite \\
+      ETOOMANY : lq'on a atteint le nb limité de sémaphores par processus (cf /usr/include/errno.h un truc comme ça) \\
+      EVAL : lq le nbr en argument est invalide (négatif, ou trop grand) (cf /usr/include/errno.h un truc comme ça) \\
+
+      \newpage
+      \textbf{int ss\_P(int sid)} \\
+      \paragraph{Description\\}
+      ss\_P décrémente le nb de ressources si le nb de ressources disponibles est non nul ; il bloque le processus si le nb de ressources disponibles est nul et l'enfile dans une file d'attente.
+      \paragraph{Retour\\}
+      Renvoie 0 en cas de succès et -1 en cas d'erreur.
+      \paragraph{Erreurs\\}
+      ENOMEM : quand l'allocation ne s'est pas faite \\
+      EVAL : si le sid ne correspond pas à un sémaphore créé \\
+
+      \newpage
+      \textbf{int ss\_V(int sid)} \\
+      \paragraph{Description\\}
+      ss\_V incrémente le nb de ressources, réveille et retire le 1er processus dans la file d'attente s'il existe. ss\_V ne peut être appelé que quand au moins une ressource est utilisée ( un ss\_V ferme un ss\_P ).
+      \paragraph{Retour\\}
+      Renvoie 0 en cas de succès et -1 en cas d'erreur.
+      \paragraph{Erreurs\\}
+      ENOMEM : quand l'allocation ne s'est pas faite \\
+      EVAL : si le sid ne correspond pas à un sémaphore créé \\
+
+      \newpage
+      \textbf{int ss\_delete(int sid)} \\
+      \paragraph{Description\\}
+      Supprime le sem pour le processus sid \\
+
+      \newpage
+      \textbf{int ss\_dbg(int sid, int* v, int* pids,[ int pidSize ], int compteurDeReference)} avec sid le sem, v le nb de ressources, pids les processus dans la file d'attente, pidSize la taille du tableau pids, compteurDeReference ??
+      \paragraph{Description\\}
+      ss\_dbg va renvoyer le nb de processus dans la file d'attente (avec max pidSize, sinon 10 par défaut)
+      \paragraph{Erreurs\\}
+      EFAULT : sid et pid valides \\
+      ... \\
+
+      \newpage
+      \subsection{Exemple}
+      \begin{lstlisting}
+      int main(int argc, char* argv) {
+        int S1, S2;
+        if(S1 = ss\_create() == -1) {
+          blabla
+        }
+        if(S2 = ss\_create() == -1) {
+          blabla
+        }
+        ss\_P(S1); ss\_P(S2); // prochains ss\_P vont être bloqués, tester si = -1
+
+        if(fork() == 0) {
+          // fils 1
+          ss\_P(S1);
+          write(1,"fils 1",7);
+          ss\_V(S1);
+          exit(0);
+        }
+        if(fork() == 0) {
+          // fils 2
+          ss\_P(S2);
+          write(1,"fils 2",7);
+          ss\_V(S2);
+          exit(0);
+        }
+        // pere
+        if(argc >= 1) {
+          ss\_V(S2);
+          wait(&status); // on attend la fin du fils 2
+          ss\_V(S1); // on réveille le fils 1
+          wait(&status);
+          // on peut refaire 2 ss\_P pour vérifier ici
+        }
+        else {
+          idem mais inversé
+        }
+        write(1,"\n",1);
+        return 0;
+      }
+      \end{lstlisting}
+
+\newpage
+\section{Implémentation}
+Dans la struct task : ajouter un champ qui correspond aux sémaphores (ss) du processus. \\
+ss\_create va ajouter un sémaphore dans ce champ, ss\_delete va le supprimer. \\
+Dans exit(), delete le champ ss s'il n'est pas nul. \\
+Dans do\_clone(), recopier au sens large la structure (champ) ss dans le fils.
+
+\newpage
+\section{Recette}
+\paragraph{Création d'un sémaphore}
+\begin{itemize}
+  \item ss\_create
+  \item ss\_dbg
+  \item ss\_P()
+  \item ss\_dbg : la ressource doit être bloquée
+  \item ss\_V()
+  \item ss\_dbg : la ressource doit être libérée
+  \item ss\_del
+  \item ss\_dbg : erreur car le sem n'existe plus
+\end{itemize}
+
+\paragraph{Exemple avec un fils}
+Trouver un scénario, ajouter des ss\_dbg dans le fils : \\
+On fait
+\begin{itemize}
+  \item ss\_P dans le père
+  \item ss\_dbg dans le père
+  \item wait dans le père pour attendre la mort du fils
+  \item ss\_dbg dans le fils
+  \item ss\_P dans le fils : ça doit être bloqué (tout)
+\end{itemize}
+
+\paragraph{Exemple avec un fils pas coincé}
+Trouver un scénario, ajouter des ss\_dbg dans le fils. On peut regarder dans le fils si le père est bien dans ss\_dbg quand on a un ss\_P dans le père. Le fils visualise la file d'attente, voit le père. Si possible l'enlever de la file d'attente et revérifier.
+
+\paragraph{Gros exemple}
+Ecriture d'une variable partagée par plusieurs processus. Par ex 4 processus père/fils, 2 qui incrémentent 1000 fois et 2 qui décrémentent 1000 fois une même variable. A la fin, la variable doit être égale à sa valeur initiale.
+
+
+\newpage
+\subsection{Deuxième programme de test}
+\paragraph{Objectif\\}
+Dans ce premier programme, les sémaphores vont agir comme des mutex (initialisés à 1). L'objectif est à partir de deux threads de naviguer entre deux sections critiques l'une après l'autre.
+\paragraph{Implémentation\\}
+Deux threads \textit{tPing} et \textit{tPong} seront lancés. Il y aura deux sections critiques contenant chacune un affichage à l'écran indiquant la section critique dans laquelle le thread se situe ("ping" ou "pong"). \\
+Le sémaphore \textit{semPong} sera initialisé à 0 pour commencer par l'affichage de "ping". Le sémaphore \textit{semPing} sera ainsi initialisé à 1.
+\paragraph{Résultat attendu\\}
+Le résultat attendu lors du lancement de ce programme C est un affichage sur la console d'une suite de "ping pong ping pong...".
+\newpage
+\subsection{Deuxième programme de test}
+\paragraph{Objectif\\}
+Dans le deuxième programme de test, les sémaphores seront utilisés pour permettre de résoudre le problème des lecteurs et rédacteurs énoncé en introduction.
+\paragraph{Implémentation\\}
+Nous décidons ici de donner la priorité aux lecteurs. Un lecteur pourra donc accéder à la base de données s'il n'y a aucun rédacteur en cours d'écriture. Un rédacteur pourra y accéder s'il n'y a aucun autre rédacteur en cours d'écriture, aucun lecteur en cours de lecture et aucun lecteur dans la file d'attente. \\
+Trois sémaphores sont nécessaires :
+\begin{itemize}
+  \item Un sémaphore \textit{semLecteurs} qui protégera l'accès à la variable \textit{nbLecteurs} indiquant le nombre de lecteurs actuellement sur la base de données.
+  \item Un sémaphore \textit{semRedacteurs} empêchant l'accès à la base de données aux autres rédacteurs lorsqu'un rédacteur y accède.
+  \item Un sémaphore \textit{redacteur} qui permet au premier lecteur de bloquer l'accès aux rédacteurs et au rédacteur accédant à la ressource de bloquer l'accès aux lecteurs pendant la rédaction.
+\end{itemize}
+On aura ensuite 4 fonctions définissant les 4 actions possibles :
+\begin{itemize}
+  \item \textit{startRead()} permettra d'incrémenter la variable \textit{nbLecteurs}. Si celle-ci est égale à 1 (premier lecteur), on lancera \textit{redacteur.acquire()} pour empêcher aux rédacteur d'accéder à la ressource.
+  \item \textit{endRead()} décrémentera la variable \textit{nbLecteurs}. Si celle-ci est égale à 0 (plus aucun lecteur), on lancera \textit{redacteur.release()} pour permettre à un éventuel rédacteur de commencer la rédaction (on va le débloquer s'il était en file d'attente).
+  \item \textit{startWrite()} bloquera l'accès à la ressource aux autres rédacteurs ainsi qu'aux lecteurs en faisant \textit{semRedacteurs.acquire()} et \textit{redacteur.acquire()}.
+  \item \textit{endWrite()} autorisera à nouveau l'accès à la ressource, en priorisant les lecteurs car on fera en premier \textit{redacteur.release()} (libération éventuelle d'un lecteur en attente) puis \textit{semRedacteurs.release()}.
+\end{itemize}
+\paragraph{Résultat attendu\\}
+Le résultat attendu lors du lancement de ce programme C est :
+\begin{itemize}
+  \item Lorsqu'un lecteur accède à la base de données, on l'affiche sur la console avec le nombre total actuel de lecteurs. De même lorsqu'un lecteur quitte la base de données.
+  \item Lorsqu'un rédacteur accède à la base de données, on l'affiche sur la console. De même lorsque le rédacteur quitte la base de données.
+\end{itemize}
+\end{document}

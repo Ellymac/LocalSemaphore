@@ -1,0 +1,402 @@
+\documentclass[12pt]{article}
+
+\usepackage[sfdefault]{ClearSans}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+\usepackage{color}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{eurosym}
+\usepackage{graphicx}
+\usepackage{fancybox}
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\color{codegray},
+    stringstyle=\color{codepurple},
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=3pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\pagestyle{plain}
+\title{Sémaphore local}
+\author{Anthony Araye et Camille Schnell}
+\date{21 février 2018}
+\begin{document}
+\maketitle
+\renewcommand{\contentsname}{Sommaire}
+\tableofcontents
+\newpage
+\section{Introduction}
+    En informatique, lorsque deux programmes exécutés en parallèle souhaitent accéder à la même donnée au même moment, cela peut créer des conflits, notamment si l'un des deux modifie la donnée. \\
+
+    \textit{\textbf{LocalSemaphores}} permet l'implémentation d'un système de sémaphores inter processus hérités par les fils d'un processus afin de gérer des sections critiques.
+
+    Les sémaphores peuvent être initialisés avec un nombre de ressources donné (fonction \textit{sem\_initialize(int nb)}), et gèrent ensuite l'allocation des ressources et la file d'attente des processus bloqués grâce aux fonctions \textit{sem\_acquire(int sid)} et \textit{sem\_release(int sid)}. La fonction \textit{sem\_destroy(int sid)} permet de détruire un sémaphore et de désallouer la file d'attente associée à ce dernier.
+
+    Un sémaphore est détruit lorsque le processus qui l'a créé ainsi que tous ses fils meurent. Sa non-rémanence lui permet ainsi d'être plus efficace que les IPC (Inter Processus Communication) utilisés habituellement sous linux.
+
+\newpage
+\section{Manuel d'utilisation}
+    \subsection{Appels systèmes}
+      \subsubsection{initialize}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_initialize(int }\textit{nb}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_initialize}() alloue et initialise un sémaphore avec \textit{nb} comme valeur initiale. \\ \textit{nb} représente le nombre de ressources disponibles. Cette valeur doit être supérieure ou égale à 0, elle vaut 1 par défaut.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_initialize}() renvoie l'id du sémaphore dans le cas où celui-ci a bien été créé, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite. \\
+          EFAULT : lorsque la valeur passée en argument est invalide (\textit{nb} < 0 ou \textit{nb} > MAX\_INT). \\
+          ETOOMANY : lorsqu'on a atteint le nombre limite de sémaphores par processus. \\
+      \newpage
+      \subsubsection{acquire}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_acquire(int }\textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_acquire} décrémente la valeur du sémaphore d'id \textit{sid} si le nombre de ressources disponibles est non nul. Dans le cas où cette valeur est inférieur ou égale à 0, alors il bloque le processus courant et le met dans la file d'attente associée au sémaphore.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_acquire} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite.
+
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+      \newpage
+      \subsubsection{release}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_release(int }\textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_release} incrémente le nombre de ressources disponibles du sémaphore d'id \textit{sid}. Dans le cas où la file associée à \textit{sid} est non vide, alors il réveille le processus en tête de file et saute la tête de la file.
+
+          \textbf{sem\_release} ne peut être appelé que quand au moins une ressource est utilisée.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_release} renvoie 0 dans le cas où le processus s'est bien effectué, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          ENOMEM : lorsque l'allocation ne s'est pas faite.
+
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+      \newpage
+      \subsubsection{destroy}
+          \paragraph{Nom\\}
+          \textbf{\#include <sem.h>}
+
+          \textbf{int sem\_destroy(int} \textit{sid}\textbf{)}
+          \paragraph{Description\\}
+          \textbf{sem\_destroy} détruit le sémaphore d'id \textit{sid} et désalloue la file d'attente.
+
+          \paragraph{Valeur renvoyée\\}
+          \textbf{sem\_destroy} renvoie 0 dans le cas où le sémaphore a bien été détruit, -1 si une erreur a été levée.
+          \paragraph{Erreurs\\}
+          EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+        \newpage
+        \subsubsection{debug}
+            \paragraph{Nom\\}
+            \textbf{\#include <sem.h>}
+
+            \textbf{int sem\_debug(int} \textit{sid}\textbf{, int* }\textit{v}\textbf{, int* }\textit{pids}\textbf{, [int }\textit{pidSize}\textbf{], int }\textit{compteurDeReference}\textbf{)}
+            \paragraph{Description\\}
+            \textbf{sem\_debug} permet de connaître le nombre de processus dans la file d'attente du sémaphore d'id \textit{sid}, utile lors d'un debug.
+
+            \textit{v} représente le nombre de ressources, \textit{pids} représente les processus dans la file d'attente, \textit{pidSize} représente la taille du tableau \textit{pids}.
+
+            \paragraph{Valeur renvoyée\\}
+            \textbf{sem\_debug} renvoie le nombre de processus dans la file d'attente du sémaphore d'id \textit{sid}, -1 si une erreur a été levée.
+            \paragraph{Erreurs\\}
+            EFAULT : lorsque le \textit{sid} passé en argument ne correspond pas à un sémaphore existant.
+    \newpage
+    \subsection{Exemple}
+    \begin{lstlisting}[language=C]
+    int main(int argc, char* argv) {
+      int s1, s2, p1, p2, status, pid1, pid2;
+
+      // init semaphores
+      if(s1 = sem_initialize() == -1) {
+        perror("sem_initialize");
+        exit(1);
+      }
+      if(s2 = sem_initialize() == -1) {
+        perror("sem_initialize");
+        exit(1);
+      }
+
+      // acquire semaphores : les prochains sem_acquire seront bloques
+      if(p1 = sem_acquire(s1) == -1) {
+        perror("sem_acquire");
+        exit(1);
+      }
+      if(p2 = sem_acquire(s2) == -1) {
+        perror("sem_acquire");
+        exit(1);
+      }
+
+      // fork pour creer fils 1 et fils 2
+      if(pid1 = fork() == -1) {
+        perror("fork");
+        exit(1);
+      } else {
+        // fils 1
+        sem_acquire(s1);
+        write(1,"fils 1",6);
+        sem_release(s1);
+        exit(0);
+      }
+      if(pid2 = fork() == -1) {
+        perror("fork");
+        exit(1);
+      } else {
+        // fils 2
+        sem_acquire(s2);
+        write(1,"fils 2",6);
+        sem_release(s2);
+        exit(0);
+      }
+
+      // pere
+      if(pid1 >= 1) {
+        sem_release(s1);
+        wait(&status); // on attend la fin du fils 1
+        sem_release(s2); // on reveille le fils 2
+        wait(&status);
+      }
+      else if(pid2 >= 1){
+        sem_release(s2);
+        wait(&status); // on attend la fin du fils 2
+        sem_release(s1); // on reveille le fils 1
+        wait(&status);
+      }
+      write(1,"\n",1);
+      return 0;
+    }
+    \end{lstlisting}
+
+\newpage
+\section{Implémentation}
+\newpage
+\section{Recette}
+L'implémentation d'un sémaphore local sera testée par des programmes C. Nous allons écrire deux programmes afin de tester le sémaphore de différentes manières.
+\subsection{Premier programme de test}
+  \paragraph{Objectif\\}
+  Ce premier programme permet de tester la création et la destruction d'un sémaphore.
+
+  \paragraph{Implémentation\\}
+  Le programme sera de la forme suivante :
+  \begin{lstlisting}[language=C]
+  int main(int argc, char* argv) {
+    int sem;
+
+    // init semaphores
+    if(sem = sem_initialize() == -1) {
+      perror("sem_initialize");
+      exit(1);
+    }
+
+    // debug -> waitlist empty
+    if(nbWaiting = sem_debug(sem) == -1) {
+      perror("sem_debug");
+      exit(1);
+    }
+
+    // acquire semaphore
+    sem_acquire(sem);
+
+    // debug -> resource blocked
+    if(nbWaiting = sem_debug(sem) == -1) {
+      perror("sem_debug");
+      exit(1);
+    }
+
+    // release semaphore
+    sem_release(sem);
+
+    // debug -> resource released
+    if(nbWaiting = sem_debug(sem) == -1) {
+      perror("sem_debug");
+      exit(1);
+    }
+
+    // destruct semaphore
+    sem_destroy(sem);
+
+    // debug -> error because semaphore sem not found (has been destroyed)
+    if(nbWaiting = sem_debug(sem) == -1) {
+      perror("sem_debug");
+      exit(1);
+    }
+
+    return 0;
+  }
+  \end{lstlisting}
+  \paragraph{Résultat attendu\\}
+  Grâce à la fonction \textit{sem\_debug} utilisée dans le programme de test on doit obtenir l'affichage décrivant les cas suivants sur la console :
+  \begin{itemize}
+    \item un semaphore créé, avec une ressource de disponible et aucun processus en file d'attente
+    \item le semaphore doit être bloqué, le nombre de ressources disponibles doit être nul
+    \item le semaphore a été libéré, le nombre de ressources disponibles doit être de 1
+    \item le semaphore a été détruit, une erreur doit s'afficher car on essaie de lancer la fonction \textit{sem\_debug} avec l'id d'un semaphore qui n'existe plus
+  \end{itemize}
+
+  \newpage
+  \subsection{Deuxième programme de test}
+  \paragraph{Objectif\\}
+  Ce programme permet de tester l'implémentation des semaphores lors de la création d'un processus fils.
+  \paragraph{Implémentation\\}
+  Le programme sera de la forme :
+  \begin{lstlisting}[language=C]
+  int main(int argc, char* argv) {
+    int sem, status, pid1;
+
+    // init semaphore
+    if(sem = sem_initialize() == -1) {
+      perror("sem_initialize");
+      exit(1);
+    }
+
+    // fork
+    if(pid1 = fork() == -1) {
+      perror("fork");
+      exit(1);
+    }
+    if(pid1 == 0){
+      // fils 1
+      sem_acquire(sem);
+      write(1,"child acquired sem\n",19)
+      sleep(2); // waiting for parent to acquire too
+      sem_debug(sem); // parent is in the waitlist
+      sem_release(sem);
+      sem_debug(sem); // empty waitlist, no free resource
+      exit(0);
+    }
+    else {
+      // pere
+      sleep(3); // waiting to be sure child will acquire first
+      sem_acquire(sem);
+      write(1,"parent acquired sem\n",20)
+      wait(&status); // waiting for child
+      sem_release(sem);
+      sem_debug(sem); // empty waitlist, 1 free resource
+    }
+    return 0;
+  }
+  \end{lstlisting}
+  \paragraph{Résultat attendu\\}
+  Grâce à la fonction \textit{sem\_debug} utilisée dans le programme de test on doit obtenir l'affichage décrivant les cas suivants sur la console :
+  \begin{itemize}
+    \item le père est dans la liste d'attente du semaphore, car le fils fait un \textit{sem\_acquire} en premier
+    \item le fils a libéré le semaphore, le père a pu faire \textit{sem\_acquire} donc la file d'attente est vide et il n'y a aucune ressource disponible car elle est utilisée par le père
+    \item le père a libéré le semaphore, la file d'attente est vide et le nombre de ressources disponibles est de 1
+  \end{itemize}
+
+  \newpage
+  \subsection{Troisième programme de test}
+  \paragraph{Objectif\\}
+  Ce programme permet de tester l'ensemble des fonctionnalité d'un semaphore local hérité par les fils d'un processus.
+  \paragraph{Implémentation\\}
+  Un processus père va créer 2 fils, et l'un de ces deux fils va lui-même créer un fils. Ces 4 processus modifieront la valeur d'une variable critique. Deux processus vont incrémenter cette valeur 1000 fois, les deux autres vont la decrémenter 1000 fois.
+  Le programme sera de cette forme :
+  \begin{lstlisting}[language=C]
+  int main(int argc, char* argv) {
+    int sem, status, pid1, pid2, pid3, i;
+
+    // init and print critical value
+    int criticalValue = 42;
+    printf("Initial value is %d\n", criticalValue);
+
+    // init semaphore
+    if(sem = sem_initialize() == -1) {
+      perror("sem_initialize");
+      exit(1);
+    }
+
+    // fork
+    if(pid1 = fork() == -1) {
+      perror("fork");
+      exit(1);
+    }
+    if(pid1 == 0){
+      // fils 1
+      sem_acquire(sem);
+      write(1,"fils 1 increments value\n",24);
+      for(i = 0; i < 1000; i++)
+        criticalValue += 1;
+      sem_release(sem);
+      exit(0);
+    }
+
+    if(pid2 = fork() == -1) {
+      perror("fork");
+      exit(1);
+    }
+    if(pid2 == 0) {
+      // fils 2
+      if(pid3 = fork() == -1) {
+        perror("fork");
+        exit(1);
+      }
+      if(pid3 == 0) {
+        // fils 3
+        sem_acquire(sem);
+        write(1,"fils 3 decrements value\n",24);
+        for(i = 0; i < 1000; i++)
+          criticalValue -= 1;
+        sem_release(sem);
+        exit(0);
+      }
+      else {
+        // fils 2
+        sem_acquire(sem);
+        write(1,"fils 2 increments value\n",24);
+        for(i = 0; i < 1000; i++)
+          criticalValue += 1;
+        sem_release(sem);
+        exit(0);
+      }
+    }
+
+    // pere
+    sem_acquire(sem);
+    write(1,"pere decrements value\n",22);
+    for(i = 0; i < 1000; i++)
+      criticalValue -= 1;
+    sem_release(sem);
+
+    // waiting for children
+    wait(&status);
+    wait(&status);
+
+    // print final critical value
+    printf("Final value is %d\n", criticalValue);
+    return 0;
+  }
+  \end{lstlisting}
+  \paragraph{Résultat attendu\\}
+  Le résultat attendu lors du lancement de ce programme C est un affichage sur la console de la valeur de la variable critique en début de programme ainsi que cette valeur à la fin du programme : la valeur doit être inchangée.
+
+\end{document}
