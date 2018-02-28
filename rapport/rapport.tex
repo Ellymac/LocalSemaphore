@@ -39,7 +39,7 @@
 \pagestyle{plain}
 \title{Sémaphore local}
 \author{Anthony Araye et Camille Schnell}
-\date{21 février 2018}
+\date{1 mars 2018}
 \begin{document}
 \maketitle
 \renewcommand{\contentsname}{Sommaire}
@@ -214,7 +214,7 @@
         \item un \textbf{nombre} représentant le nombre de ressources disponibles pour ce sémaphore
         \item une \textbf{file d'attente} de processus.\\
       \end{itemize}
-      Pour déterminer un numéro d'identification pour le sémaphore, on initialise une variable globale à 0 qui s'incrémente à chaque appel de l'appel système \textit{ss\_initialize}.\\
+      Pour déterminer un numéro d'identification pour le sémaphore, on initialise une variable globale à 0 qui s'incrémente à chaque appel de l'appel système \textit{sem\_initialize}.\\
 
       De plus, les fonctions \textit{do\_clone}() et \textit{exit}() doivent être modifiées :
       \begin{itemize}
