@@ -199,6 +199,69 @@
 
 \newpage
 \section{Implémentation}
+    \subsection{Structure du sémaphore}
+      Pour implémenter la structure du sémaphore, plusieurs modifications sont à faire dans les fichiers sched.h et fork.c.\\
+
+      La structure \textit{task\_struct}, qui se trouve dans le fichier sched.h, doit implémenter de nouveaux attributs :
+      \begin{itemize}
+        \item un \textbf{tableau d'entiers} représentant l'ensemble des identifiants des sémaphores.
+        \item un \textbf{tableau de sémaphores}.\\
+      \end{itemize}
+
+      Le sémaphore aura une structure définie comme suit :
+      \begin{itemize}
+        \item un \textbf{entier} représentant l'identifiant du sémaphore
+        \item un \textbf{nombre} représentant le nombre de ressources disponibles pour ce sémaphore
+        \item une \textbf{file d'attente} de processus.\\
+      \end{itemize}
+      Pour déterminer un numéro d'identification pour le sémaphore, on initialise une variable globale à 0 qui s'incrémente à chaque appel de l'appel système \textit{ss\_initialize}.\\
+
+      De plus, les fonctions \textit{do\_clone}() et \textit{exit}() doivent être modifiées :
+      \begin{itemize}
+        \item dans \textit{do\_clone}(), les processus fils doivent hériter des sémaphores du processus père.
+        \item dans \textit{exit}(), il faut vérifier s'il y a des sémaphores qui ne sont plus utilisés et les supprimer.\\
+      \end{itemize}
+
+    \subsection{Appels systèmes}
+      \subsubsection{initialize}
+        L'appel système se fait de la manière suivante :
+        \begin{itemize}
+          \item Enregistre dans une variable \textit{result} la variable globale représentant le nombre de sémaphore créé à cet instant.
+          \item Incrémente la variable globale.
+          \item Enregistrer l'identifiant dans le processsus.
+          \item Renvoie result.
+        \end{itemize}
+      \subsubsection{acquire}
+        L'appel système se fait de la manière suivante :
+          \begin{itemize}
+            \item Recherche le sémaphore dans task\_struct.
+            \item Décrémente la valeur du sémaphore.
+            \item Dans le cas où cette valeur est strictement inférieur à 0, on bloque le processus et on le met dans une file d'attente.
+            \item Renvoie 0 s'il n'y a eu aucune erreur, sinon -1.
+          \end{itemize}
+      \subsubsection{release}
+        L'appel système se fait de la manière suivante :
+          \begin{itemize}
+            \item Recherche le sémaphore dans task\_struct.
+            \item Incrémente la valeur du sémaphore.
+            \item Dans le cas où la file d'attente est non vide, on débloque le processus en tête de file.
+            \item Renvoie 0 s'il n'y a eu aucune erreur, sinon -1.
+          \end{itemize}
+      \subsubsection{destroy}
+        L'appel système se fait de la manière suivante :
+          \begin{itemize}
+            \item Recherche le sémaphore dans task\_struct.
+            \item Désalloue la file d'attente liée au sémaphore.
+            \item Détruit le sémaphore.
+            \item Renvoie 0 s'il n'y a eu aucune erreur, sinon -1.
+          \end{itemize}
+      \subsubsection{debug}
+        L'appel système se fait de la manière suivante :
+          \begin{itemize}
+            \item Recherche le sémaphore dans task\_struct.
+            \item Affichage d'informations concernant le sémaphore, comme les pids des processus dans la file d'attente.
+            \item Renvoie le nombre de processus dans la file d'attente s'il n'y a eu aucune erreur, sinon -1.
+          \end{itemize}
 \newpage
 \section{Recette}
 L'implémentation d'un sémaphore local sera testée par des programmes C. Nous allons écrire deux programmes afin de tester le sémaphore de différentes manières.
