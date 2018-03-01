@@ -21,33 +21,30 @@
 struct task_struct *sleeping;
 
 /** définit la fonction **/
-SYSCALL_DEFINE1(mysleep, int, x)
+SYSCALL_DEFINE0(mysleep)
 // int sys_mysleep(int x)
 {
     sleeping = current;
-    /* 
-        code pour s'endormir
-    */
-    if (x < 0){
-        return (EINVAL);
-    }
-    return x+1;
+
+    current->state = TASK_INTERRUPTIBLE;
+    schedule();
+    return 0;
 }
 
 SYSCALL_DEFINE0(mywakeup)
 // int sys_mywakeup()
 {
-    /** 
     if (sleeping == 0){
         return 0;
     }
     else{
         // code pour se révéiller
+        wake_up_process(sleeping);
 
         sleeping = 0;
         return 0;
     }
-    **/
+    
     printk(KERN_DEBUG "BINGO\n");
     return 0;
 }
