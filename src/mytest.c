@@ -18,11 +18,16 @@
 
 #include <asm/uaccess.h>
 
+struct task_struct *sleeping;
 
 /** définit la fonction **/
 SYSCALL_DEFINE1(mysleep, int, x)
 // int sys_mysleep(int x)
 {
+    sleeping = current;
+    /* 
+        code pour s'endormir
+    */
     if (x < 0){
         return (EINVAL);
     }
@@ -32,6 +37,17 @@ SYSCALL_DEFINE1(mysleep, int, x)
 SYSCALL_DEFINE0(mywakeup)
 // int sys_mywakeup()
 {
+    /** 
+    if (sleeping == 0){
+        return 0;
+    }
+    else{
+        // code pour se révéiller
+
+        sleeping = 0;
+        return 0;
+    }
+    **/
     printk(KERN_DEBUG "BINGO\n");
     return 0;
 }
