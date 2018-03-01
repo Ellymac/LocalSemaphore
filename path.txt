@@ -1,0 +1,4 @@
+Makefile -> kernel/Makefile
+syscall_table_32.S -> arch/x86/kernel/syscall_table_32.S
+mytest.c -> kernel/mytest.c
+mytest.h -> kernel/mytest.h
