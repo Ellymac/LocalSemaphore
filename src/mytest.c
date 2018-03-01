@@ -24,7 +24,7 @@ SYSCALL_DEFINE1(mysleep, int, x)
 // int sys_mysleep(int x)
 {
     if (x < 0){
-        return _EINVAL;
+        return (EINVAL);
     }
     return x+1;
 }
@@ -32,6 +32,6 @@ SYSCALL_DEFINE1(mysleep, int, x)
 SYSCALL_DEFINE0(mywakeup)
 // int sys_mywakeup()
 {
-    printk("BINGO\n");
+    printk(KERN_DEBUG "BINGO\n");
     return 0;
 }
