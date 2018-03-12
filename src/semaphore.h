@@ -1,9 +1,11 @@
+#define MAX_TAB 1000
+
 struct t_sem
 {
     int id;
     int nb_max;
     int nb_available;
-    task_struct *waitlist;
+    task_struct waitlist[MAX_TAB];
     int nb_elt_proc;
     int count_ref;
 };
