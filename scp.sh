@@ -13,4 +13,11 @@ pathKernel="~/data/linux-2.6.30-ise/kernel/"
 pathTest="/home/root/"
 
 echo `scp test/*.c root@$ip:$pathTest`
-echo ̀`scp src/mytest.c root@$ip:$pathKernel`
+echo `scp test/*.h root@$ip:$pathTest`
+echo ̀`scp src/*.c root@$ip:$pathKernel`
+echo ̀`scp src/*.h root@$ip:$pathKernel`
+echo ̀`scp src/syscall_table_32.S root@$ip:$pathKernel`
+echo ̀`scp src/Makefile root@$ip:$pathKernel`
+
+
+
