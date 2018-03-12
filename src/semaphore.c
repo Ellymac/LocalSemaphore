@@ -20,6 +20,8 @@
 
 #include "semaphore.h"
 
+struct task_struct *p;
+
 sem sem_initialize(int nb)
 {
     sem t = vmalloc(sizeof(struct t_sem));
@@ -39,6 +41,65 @@ int sem_destroy(int sid)
     kfree(tab);
     kfree(s);
     return 0;
+}
+
+SYSCALL_DEFINE1(sem_acquire, int, id){
+    p = current;
+    int nb_tab = p->nb_sem;
+    if (nb_tab <= id){
+        sem s = p->tab_sem[id];
+        if (s == NULL){
+            /** erreur à faire : semaphore non alloué */
+        }
+        else{
+            if (s->nb_available == 0)
+            {
+                s->waitlist[nb_elt_proc] = current;
+                s->nb_elt_proc++;
+                mysleep();
+            }
+            else
+            {
+                s->nb_available--;
+            }
+        }
+    }
+    else{
+        /** erreur à faire : semaphore non alloué */
+    }
+}
+
+SYSCALL_DEFINE1(sem_release, int, id)
+{
+    p = current;
+    int nb_tab = p->nb_sem;
+    if (nb_tab <= id)
+    {
+        sem s = p->tab_sem[id];
+        if (s == NULL){
+            /** erreur à faire : semaphore non alloué */
+        }
+        else
+        {
+            if (s->nb_max == s->nb_available){
+                /** erreur à faire : 
+                 * nombre de ressources à desallouer 
+                 * impossible
+                */
+            }
+            else if (s->nb_elt_proc > 0){
+
+                //wake_up_process(sleeping);
+            }
+            else{
+                s->nb_available++;
+            }
+        }
+    }
+    else
+    {
+        /** erreur à faire : semaphore non alloué */
+    }
 }
 
 int main(int argc, char *argv[])

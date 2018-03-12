@@ -1444,7 +1444,7 @@ struct task_struct {
 #endif
 
 	int nb_sem;
-	sem *tab_sem;
+	sem tab_sem[MAX_TAB];
 };
 
 /* Future-safe accessor for struct task_struct's cpus_allowed. */

@@ -336,3 +336,7 @@ ENTRY(sys_call_table)
 	.long sys_pwritev
 	.long sys_mysleep        /* 335   */
 	.long sys_mywakeup
+	.long sys_sem_initialize
+	.long sys_sem_destroy
+	.long sys_sem_acquire
+	.long sys_sem_release   /* 340 */
