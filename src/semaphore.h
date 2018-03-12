@@ -3,7 +3,9 @@ struct t_sem
     int id;
     int nb_max;
     int nb_available;
-    int *waitlist;
+    task_struct *waitlist;
+    int nb_elt_proc;
+    int count_ref;
 };
 
 typedef struct t_sem *sem;
