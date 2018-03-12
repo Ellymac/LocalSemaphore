@@ -1442,6 +1442,9 @@ struct task_struct {
 	/* state flags for use by tracers */
 	unsigned long trace;
 #endif
+
+	int nb_sem;
+	sem *tab_sem;
 };
 
 /* Future-safe accessor for struct task_struct's cpus_allowed. */
