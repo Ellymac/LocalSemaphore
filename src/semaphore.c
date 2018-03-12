@@ -45,60 +45,81 @@ int sem_destroy(int sid)
 
 SYSCALL_DEFINE1(sem_acquire, int, id){
     p = current;
-    int nb_tab = p->nb_sem;
-    if (nb_tab <= id){
-        sem s = p->tab_sem[id];
-        if (s == NULL){
-            /** erreur à faire : semaphore non alloué */
-        }
-        else{
-            if (s->nb_available == 0)
+    t_sem_ens *sem_ens = p->lsem;
+    if (sem_ens == NULL){
+        /** erreur : sem_ens non alloué*/
+    }
+    else{
+        int nb_tab = sem_ens->nb_sem;
+        if (nb_tab <= id)
+        {
+            t_sem *s = sem_ens->all_sem[id];
+            if (s == NULL)
             {
-                s->waitlist[nb_elt_proc] = current;
-                s->nb_elt_proc++;
-                mysleep();
+                /** erreur à faire : semaphore non alloué */
             }
             else
             {
-                s->nb_available--;
+                if (s->nb_available == 0)
+                {
+                    s->waitlist[nb_elt_proc] = current;
+                    s->nb_elt_proc++;
+                    mysleep();
+                }
+                else
+                {
+                    s->nb_available--;
+                }
             }
         }
-    }
-    else{
-        /** erreur à faire : semaphore non alloué */
+        else
+        {
+            /** erreur à faire : semaphore non alloué */
+        }
     }
 }
 
 SYSCALL_DEFINE1(sem_release, int, id)
 {
     p = current;
-    int nb_tab = p->nb_sem;
-    if (nb_tab <= id)
+    t_sem_ens *sem_ens = p->lsem;
+    if (sem_ens == NULL)
     {
-        sem s = p->tab_sem[id];
-        if (s == NULL){
-            /** erreur à faire : semaphore non alloué */
-        }
-        else
+        /** erreur : sem_ens non alloué*/
+    }
+    else{
+        int nb_tab = sem_ens->nb_sem;
+        if (nb_tab <= id)
         {
-            if (s->nb_max == s->nb_available){
-                /** erreur à faire : 
+            t_sem *s = sem_ens->all_sem[id];
+            if (s == NULL)
+            {
+                /** erreur à faire : semaphore non alloué */
+            }
+            else
+            {
+                if (s->nb_max == s->nb_available)
+                {
+                    /** erreur à faire : 
                  * nombre de ressources à desallouer 
                  * impossible
                 */
-            }
-            else if (s->nb_elt_proc > 0){
+                }
+                else if (s->nb_elt_proc > 0)
+                {
 
-                //wake_up_process(sleeping);
-            }
-            else{
-                s->nb_available++;
+                    //wake_up_process(sleeping);
+                }
+                else
+                {
+                    s->nb_available++;
+                }
             }
         }
-    }
-    else
-    {
-        /** erreur à faire : semaphore non alloué */
+        else
+        {
+            /** erreur à faire : semaphore non alloué */
+        }
     }
 }
 
