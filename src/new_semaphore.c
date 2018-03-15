@@ -71,9 +71,18 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
             {
                 if (s->nb_available == 0)
                 {
-                    /*s->waitlist[s->nb_elt_proc] = current;
-                    s->nb_elt_proc++;
-                    mysleep();*/
+                    int bottom = (s->waitlist)->bottom;
+                    int top = (s->waitlist)->top;
+                    if (bottom - top == 1001 || bottom + top == 1001){
+                        /** erreur : file remplie **/
+                    }
+                    else{
+                        (s->waitlist)->tabproc[bottom] = current;
+                        (s->waitlist)->bottom = ((s->waitlist)->bottom + 1)%1001;
+                        /*s->waitlist[s->nb_elt_proc] = current;
+                        s->nb_elt_proc++;
+                        mysleep();*/
+                    }
                 }
                 else
                 {
@@ -116,7 +125,8 @@ SYSCALL_DEFINE1(sem_release, int, id)
                 }
                 else if (s->nb_elt_proc > 0)
                 {
-
+                    (s->nb_elt_proc)--;
+                    (s->waitlist)->top = ((s->waitlist)->top + 1)%1001;
                     //wake_up_process(sleeping);
                 }
                 else
