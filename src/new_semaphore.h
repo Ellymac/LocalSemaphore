@@ -25,3 +25,12 @@ static inline int sem_initialize(int nb) {
 static inline int sem_destroy(int nb) {
   return syscall(338, nb);
 }
+
+static inline int sem_acquire(int id){
+  return syscall(339, id);
+}
+
+static inline int sem_release(int id)
+{
+  return syscall(340, id);
+}

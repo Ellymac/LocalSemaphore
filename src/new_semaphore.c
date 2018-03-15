@@ -11,24 +11,34 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
   t_sem_ens *sem_ens;
   t_waitlist *waitlist;
   p = current;
-  sem_ens = p->lsem;
   waitlist = s->waitlist;
 
+  //init lsem
+  if (p->lsem == NULL){
+      p->lsem = vmalloc(sizeof(struct t_sem_ens));
+      (p->lsem)->nb_sem = 0;
+  }
+  sem_ens = p->lsem;
+
   // init s
+  s = vmalloc(sizeof(t_sem));
   s->nb_max = nb;
   s->nb_available = nb;
+
   // waitlist
+  waitlist = vmalloc(sizeof(t_waitlist));
   waitlist->top = 0;
   waitlist->bottom = 0;
-  /*if((waitlist->tabproc = vmalloc(MAX_TAB * sizeof(struct task_struct))) == NULL)
-    return (ENOMEM);*/
+  if((waitlist->tabproc = vmalloc(MAX_TAB * sizeof(struct task_struct))) == NULL)
+    return (ENOMEM);
+
   s->nb_elt_proc = 0; // empty waitlist
 
-  s->id = sem_ens->nb_sem + 1;
+  s->id = sem_ens->nb_sem;
   s->count_ref = 1; // 1 process is using semaphore s
 
   // add s to sem_ens of task_struct
-  if(s->id > MAX_SEM)
+  if(s->id >= MAX_SEM)
     return (ENOMEM); // limited number of sem in a process
   else
   {
