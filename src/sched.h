@@ -91,15 +91,23 @@ struct sched_param {
 
 #include <asm/processor.h>
 
-#define MAX_TAB 1000
+#define MAX_TAB 1001
 #define MAX_SEM 1000
+
+struct t_waitlist{
+	int top;
+	int bottom;
+	struct task_struct *tabproc[MAX_TAB];
+}
+
+typedef t_waitlist t_waitlist;
 
 struct t_sem
 {
 	int id;
 	int nb_max;
 	int nb_available;
-	struct task_struct *waitlist[MAX_TAB];
+	t_waitlist *waitlist;
 	int nb_elt_proc;
 	int count_ref;
 };
