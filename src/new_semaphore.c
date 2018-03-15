@@ -18,29 +18,33 @@
 
 #include <asm/uaccess.h>
 
-#include "semaphore.h"
-
 struct task_struct *p;
 
-sem sem_initialize(int nb)
+SYSCALL_DEFINE1(sem_initialize, int, nb)
+// int sem_initialize(int nb)
 {
-    sem t = vmalloc(sizeof(struct t_sem));
-    t->nb_max = nb;
-    t->nb_available = nb;
-    t->id = 0;
-    t->waitlist = vmalloc(sizeof(int));
-    return t;
+  p = current;
+  t_sem t;
+  t.nb_max = nb;
+  t.nb_available = nb;
+  t.id =0;
+  t.nb_elt_proc = 0;
+  t.count_ref = 0;
+  return t.id;
 }
 
-int sem_destroy(int sid)
+SYSCALL_DEFINE1(sem_destroy, int, sid)
+// int sem_destroy(int sid)
 {
-    struct task_struct *c;
-    c = current;
-    sem s = c->tab_sem[sid];
-    int *tab = s->waitlist;
-    kfree(tab);
-    kfree(s);
-    return 0;
+  p = current;
+  t_sem *s;
+  t_sem_ens *sems;
+  sems = p->lsem;
+  s = sems->all_sem;
+  struct task_struct **tab = s[sid].waitlist;
+  kfree(tab);
+  //kfree(s);
+  return 0;
 }
 
 SYSCALL_DEFINE1(sem_acquire, int, id){
@@ -100,8 +104,8 @@ SYSCALL_DEFINE1(sem_release, int, id)
             {
                 if (s->nb_max == s->nb_available)
                 {
-                    /** erreur à faire : 
-                 * nombre de ressources à desallouer 
+                    /** erreur à faire :
+                 * nombre de ressources à desallouer
                  * impossible
                 */
                 }
@@ -121,11 +125,4 @@ SYSCALL_DEFINE1(sem_release, int, id)
             /** erreur à faire : semaphore non alloué */
         }
     }
-}
-
-int main(int argc, char *argv[])
-{
-    sem result = sem_initialize(2);
-    printk(KERN_DEBUG "%d", result->nb_max);
-    return 0;
 }
