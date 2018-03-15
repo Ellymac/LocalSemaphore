@@ -109,8 +109,8 @@ typedef struct t_sem t_sem;
 struct t_sem_ens
 {
 	int nb_sem;
-	t_sem *sem[MAX_SEM];
-}
+	t_sem *all_sem[MAX_SEM];
+};
 
 typedef struct t_sem_ens t_sem_ens;
 

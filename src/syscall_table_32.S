@@ -334,5 +334,7 @@ ENTRY(sys_call_table)
 	.long sys_inotify_init1
 	.long sys_preadv
 	.long sys_pwritev
-	.long sys_mysleep        /* 335   */
-	.long sys_mywakeup
+	.long sys_mysleep								/* 335   */
+	.long sys_mywakeup							/* 336   */
+	.long sys_sem_initialize        /* 337   */
+	.long sys_sem_destroy						/* 338   */
