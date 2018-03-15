@@ -18,6 +18,8 @@
 
 #include <asm/uaccess.h>
 
+#include "mytest.h"
+
 struct task_struct *sleeping;
 
 /** définit la fonction **/
@@ -44,7 +46,7 @@ SYSCALL_DEFINE0(mywakeup)
         sleeping = 0;
         return 0;
     }
-    
+
     printk(KERN_DEBUG "BINGO\n");
     return 0;
 }

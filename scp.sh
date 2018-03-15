@@ -17,6 +17,10 @@ echo `scp test/*.c root@$ip:$pathTest`
 echo `scp test/*.h root@$ip:$pathTest`
 
 echo ̀`scp src/new_semaphore.c root@$ip:$pathKernel`
+echo ̀`scp src/new_semaphore.h root@$ip:$pathKernel`
+
+echo ̀`scp src/mytest.c root@$ip:$pathKernel`
+echo ̀`scp src/mytest.h root@$ip:$pathKernel`
 
 echo ̀`scp src/sched.h root@$ip:$pathSched`
 

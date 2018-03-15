@@ -98,9 +98,9 @@ struct t_waitlist{
 	int top;
 	int bottom;
 	struct task_struct *tabproc[MAX_TAB];
-}
+};
 
-typedef t_waitlist t_waitlist;
+typedef struct t_waitlist t_waitlist;
 
 struct t_sem
 {
