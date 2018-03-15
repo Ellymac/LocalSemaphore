@@ -891,6 +891,20 @@ NORET_TYPE void do_exit(long code)
 	struct task_struct *tsk = current;
 	int group_dead;
 
+	/** Destroy lsem **/
+	int i;
+	
+	for (i = 0; i < MAX_SEM ; i++){
+		if ((tsk->lsem)->all_sem[i] != NULL){
+			((current->lsem)->all_sem[i])->count_ref--;
+			if (((current->lsem)->all_sem[i])->count_ref == 0){
+				free(((current->lsem)->all_sem[i])->waitlist);
+				free((current->lsem)->all_sem[i]);
+			}
+		}
+		free(tsk->lsem);
+	}
+
 	profile_task_exit(tsk);
 
 	WARN_ON(atomic_read(&tsk->fs_excl));

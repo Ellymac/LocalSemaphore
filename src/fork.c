@@ -1400,6 +1400,19 @@ long do_fork(unsigned long clone_flags,
 
 		nr = task_pid_vnr(p);
 
+		/** Recreate lsem */
+		p->lsem = vmalloc(sizeof(struct t_sem_ens));
+		(p->lsem)->nb_sem = (current->lsem)->nb_sem;
+		int i;
+		for (i = 0 ; i < MAX_SEM ; i++){
+			if ((current->lsem)->all_sem[i] != NULL){
+				((current->lsem)->all_sem[i])->count_ref++;
+				(p->lsem)->all_sem[i] = (current->lsem)->all_sem[i];
+			}
+		}
+		(p->lsem)->all_sem = vmalloc(sizeof(struct t_sem_ens));
+		(current->lsem)->all_sem;
+
 		if (clone_flags & CLONE_PARENT_SETTID)
 			put_user(nr, parent_tidptr);
 
