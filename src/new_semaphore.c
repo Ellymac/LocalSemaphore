@@ -18,6 +18,8 @@
 #include <linux/kexec.h>
 #include <linux/unistd.h>
 
+#include <stdarg.h>
+
 #include <asm/uaccess.h>
 
 struct task_struct *p;
@@ -174,4 +176,28 @@ SYSCALL_DEFINE1(sem_release, int, id)
             /** erreur à faire : semaphore non alloué */
         }
     }
+}
+
+SYSCALL_DEFINE1(sem_dbg, int, id){
+    p = current;
+    if (p->lsem == NULL){
+        /*** erreur */
+    }
+    if (id >= MAX_SEM){
+        /** erreur */
+    }
+    if ((p->lsem)->all_sem[id] == NULL){
+        /** erreur */
+    }
+    t_sem *s = (p->lsem)->all_sem[id];
+    printk("id : %d\n", s->id);
+    printk("nb_max : %d\n", s->nb_max);
+    printk("nb_available : %d\n", s->nb_available);
+    int i;
+    t_waitlist *w = s->waitlist;
+    for (i = w->top ; i != w->bottom ; i = (i+1)%1001){
+        printk("pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
+    }
+    printk("nb_elt_proc : %d\n", s->nb_elt_proc);
+    printk("count_ref : %d\n", s->count_ref);
 }

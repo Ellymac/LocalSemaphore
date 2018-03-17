@@ -340,3 +340,5 @@ ENTRY(sys_call_table)
 	.long sys_sem_destroy
 	.long sys_sem_acquire
 	.long sys_sem_release   /* 340 */
+	.long sys_sem_dbg   
+

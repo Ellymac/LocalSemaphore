@@ -347,6 +347,7 @@
 #define __NR_sem_destroy 338
 #define __NR_sem_acquire 339
 #define __NR_sem_release 340
+#define __NR_sem_dbg 341
 
 #ifdef __KERNEL__
 
