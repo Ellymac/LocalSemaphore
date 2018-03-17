@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
     int result = 0;
-    if((result = sem_initialize(2)) != -1)
+    if((result = sys_sem_initialize(2)) != -1)
         printf("Sem id : %d\n", result);
     else
         perror("sem_initialize call");
