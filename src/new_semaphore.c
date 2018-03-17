@@ -1,4 +1,24 @@
-#include "new_semaphore.h"
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <linux/mm.h>
+#include <linux/tty.h>
+#include <linux/tty_driver.h>
+#include <linux/console.h>
+#include <linux/init.h>
+#include <linux/jiffies.h>
+#include <linux/nmi.h>
+#include <linux/module.h>
+#include <linux/moduleparam.h>
+#include <linux/interrupt.h> /* For in_interrupt() */
+#include <linux/delay.h>
+#include <linux/smp.h>
+#include <linux/security.h>
+#include <linux/bootmem.h>
+#include <linux/syscalls.h>
+#include <linux/kexec.h>
+#include <linux/unistd.h>
+
+#include <asm/uaccess.h>
 
 struct task_struct *p;
 
@@ -29,8 +49,6 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
   waitlist = vmalloc(sizeof(t_waitlist));
   waitlist->top = 0;
   waitlist->bottom = 0;
-  if((waitlist->tabproc = vmalloc(MAX_TAB * sizeof(struct task_struct))) == NULL)
-    return (ENOMEM);
 
   s->nb_elt_proc = 0; // empty waitlist
 
@@ -52,14 +70,20 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
 SYSCALL_DEFINE1(sem_destroy, int, sid)
 // int sem_destroy(int sid)
 {
-/*  p = current;
-  t_sem *s;
-  t_sem_ens *sem_ens = p->lsem;
-  s = sem_ens->all_sem[sid];
-  //struct task_struct **tab = s->waitlist;
-  kfree(tab);
-  //kfree(s);*/
-  return 0;
+    p = current;
+    if (p->lsem == NULL){
+        /** erreur : non alloué */
+    }
+    if (sid >= MAX_SEM){
+        /** erreur */
+    }
+    t_sem *s = (p->lsem)->all_sem[sid];
+    if (s == NULL){
+        /** erreur */
+    }
+    kfree(s->waitlist);
+    kfree(s);
+    return 0;
 }
 
 SYSCALL_DEFINE1(sem_acquire, int, id){

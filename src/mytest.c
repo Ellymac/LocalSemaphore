@@ -18,7 +18,6 @@
 
 #include <asm/uaccess.h>
 
-#include "mytest.h"
 
 struct task_struct *sleeping;
 
