@@ -2,4 +2,7 @@ Makefile -> kernel/Makefile
 syscall_table_32.S -> arch/x86/kernel/syscall_table_32.S
 mytest.c -> kernel/mytest.c
 mytest.h -> kernel/mytest.h
-sched.h -> include/kernel/sched.h
+sched.h -> include/linux/sched.h
+unistd_32.h -> arch/x86/include/asm/unistd_32.h
+unistd_64.h -> arch/x86/include/asm/unistd_64.h
+
