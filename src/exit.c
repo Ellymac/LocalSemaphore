@@ -891,26 +891,7 @@ NORET_TYPE void do_exit(long code)
 	struct task_struct *tsk = current;
 	int group_dead;
 
-	/** Destroy lsem **/
-	if(tsk->lsem != NULL) {
-		int i;
 
-		for (i = 0; i < MAX_SEM ; i++){
-			if ((tsk->lsem)->all_sem[i] != NULL){
-				((current->lsem)->all_sem[i])->count_ref--;
-				if (((current->lsem)->all_sem[i])->count_ref == 0){
-					if((current->lsem)->all_sem[i] != NULL && ((current->lsem)->all_sem[i])->waitlist != NULL) {
-						vfree(((current->lsem)->all_sem[i])->waitlist);
-						vfree((current->lsem)->all_sem[i]);
-						((current->lsem)->all_sem[i])->waitlist = NULL;
-						(current->lsem)->all_sem[i] = NULL;
-					}
-				}
-			}
-			vfree(tsk->lsem);
-			tsk->lsem = NULL;
-		}
-	}
 
 	profile_task_exit(tsk);
 
@@ -981,6 +962,26 @@ NORET_TYPE void do_exit(long code)
 		acct_process();
 	trace_sched_process_exit(tsk);
 
+	/** Destroy lsem **/
+	if(tsk->lsem != NULL) {
+		int i;
+
+		for (i = 0; i < MAX_SEM ; i++){
+			if ((tsk->lsem)->all_sem[i] != NULL){
+				((tsk->lsem)->all_sem[i])->count_ref--;
+				if (((tsk->lsem)->all_sem[i])->count_ref == 0){
+					if(((tsk->lsem)->all_sem[i])->waitlist != NULL) {
+						vfree(((tsk->lsem)->all_sem[i])->waitlist);
+						vfree((tsk->lsem)->all_sem[i]);
+						((tsk->lsem)->all_sem[i])->waitlist = NULL;
+						(tsk->lsem)->all_sem[i] = NULL;
+					}
+				}
+			}
+			vfree(tsk->lsem);
+			tsk->lsem = NULL;
+		}
+	}
 	exit_sem(tsk);
 	exit_files(tsk);
 	exit_fs(tsk);
