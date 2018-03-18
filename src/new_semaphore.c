@@ -74,14 +74,14 @@ SYSCALL_DEFINE1(sem_destroy, int, sid)
 {
     p = current;
     if (p->lsem == NULL){
-        /** erreur : non alloué */
+        return (EFAULT);
     }
     if (sid >= MAX_SEM){
         /** erreur */
     }
     t_sem *s = (p->lsem)->all_sem[sid];
     if (s == NULL){
-        /** erreur */
+        return (EFAULT);
     }
     kfree(s->waitlist);
     kfree(s);
@@ -92,7 +92,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
     p = current;
     t_sem_ens *sem_ens = p->lsem;
     if (sem_ens == NULL){
-        /** erreur : sem_ens non alloué*/
+        return (EFAULT);
     }
     else{
         int nb_tab = sem_ens->nb_sem;
@@ -101,7 +101,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
             {
-                /** erreur à faire : semaphore non alloué */
+                return (EFAULT);
             }
             else
             {
@@ -110,7 +110,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
                     int bottom = (s->waitlist)->bottom;
                     int top = (s->waitlist)->top;
                     if (bottom - top == 1001 || bottom + top == 1001){
-                        /** erreur : file remplie **/
+                        return (ENOMEM);
                     }
                     else{
                         (s->waitlist)->tabproc[bottom] = current;
@@ -128,7 +128,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
         }
         else
         {
-            /** erreur à faire : semaphore non alloué */
+            return (EFAULT);
         }
     }
 }
@@ -139,7 +139,7 @@ SYSCALL_DEFINE1(sem_release, int, id)
     t_sem_ens *sem_ens = p->lsem;
     if (sem_ens == NULL)
     {
-        /** erreur : sem_ens non alloué*/
+        return (EFAULT);
     }
     else{
         int nb_tab = sem_ens->nb_sem;
@@ -148,12 +148,13 @@ SYSCALL_DEFINE1(sem_release, int, id)
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
             {
-                /** erreur à faire : semaphore non alloué */
+                return (EFAULT);
             }
             else
             {
                 if (s->nb_max == s->nb_available)
                 {
+                    return (ENOMEM);
                     /** erreur à faire :
                  * nombre de ressources à desallouer
                  * impossible
@@ -173,7 +174,7 @@ SYSCALL_DEFINE1(sem_release, int, id)
         }
         else
         {
-            /** erreur à faire : semaphore non alloué */
+            return (EFAULT);
         }
     }
 }
