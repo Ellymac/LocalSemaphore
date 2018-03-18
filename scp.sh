@@ -1,30 +1,31 @@
 #!/bin/bash
 
-
-if [ $# -ge 1 ];then
-  ip="192.168.56.100"
-else
-  ip="192.168.56.16"
-fi
-
-echo $ip
-
 pathKernel="~/data/linux-2.6.30-ise/kernel/"
 pathSched="~/data/linux-2.6.30-ise/include/linux/"
 pathTest="/home/root/"
 
-echo `scp test/*.c root@$ip:$pathTest`
-echo `scp test/*.h root@$ip:$pathTest`
-
-echo ̀`scp src/new_semaphore.c root@$ip:$pathKernel`
-
-echo ̀`scp src/mytest.c root@$ip:$pathKernel`
-
-echo ̀`scp src/sched.h root@$ip:$pathSched`
-
-echo ̀`scp src/syscalls.h root@$ip:$pathSched`
-
-echo ̀`scp src/syscall_table_32.S root@$ip:~/data/linux-2.6.30-ise/arch/x86/kernel/`
-echo ̀`scp src/unistd_32.h root@$ip:~/data/linux-2.6.30-ise/arch/x86/include/asm`
+ip="192.168.56.16"
 
 echo ̀`scp src/Makefile root@$ip:$pathKernel`
+
+if [ $# -ge 1 ];then
+  if [ $1 == 0 ];then
+    echo ̀`scp src/sched.h root@$ip:$pathSched`
+    echo ̀`scp src/syscalls.h root@$ip:$pathSched`
+    echo ̀`scp src/syscall_table_32.S root@$ip:~/data/linux-2.6.30-ise/arch/x86/kernel/`
+    echo ̀`scp src/unistd_32.h root@$ip:~/data/linux-2.6.30-ise/arch/x86/include/asm`
+  fi
+  if [ $1 == 1 ];then
+    echo ̀`scp src/new_semaphore.c root@$ip:$pathKernel`
+    echo ̀`scp src/mytest.c root@$ip:$pathKernel`
+  fi
+  if [ $1 == 2 ];then
+    echo Test
+    echo `scp test/*.c root@$ip:$pathTest`
+    echo `scp test/*.h root@$ip:$pathTest`
+  fi
+else
+  echo False
+fi
+
+echo $ip
