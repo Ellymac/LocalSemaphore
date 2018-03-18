@@ -98,15 +98,17 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
     p = current;
     t_sem_ens *sem_ens = p->lsem;
     if (sem_ens == NULL){
+        printk("sem_ens\n");
         return (EFAULT);
     }
     else{
         int nb_tab = sem_ens->nb_sem;
-        if (nb_tab <= id)
+        if (nb_tab > id)
         {
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
             {
+                printk("sem\n");
                 return (EFAULT);
             }
             else
@@ -134,6 +136,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
         }
         else
         {
+            printk("id\n");
             return (EFAULT);
         }
     }
@@ -149,7 +152,7 @@ SYSCALL_DEFINE1(sem_release, int, id)
     }
     else{
         int nb_tab = sem_ens->nb_sem;
-        if (nb_tab <= id)
+        if (nb_tab > id)
         {
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
