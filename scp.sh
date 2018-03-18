@@ -10,12 +10,14 @@ echo ̀`scp src/Makefile root@$ip:$pathKernel`
 
 if [ $# -ge 1 ];then
   if [ $1 == 0 ];then
+    echo File system
     echo ̀`scp src/sched.h root@$ip:$pathSched`
     echo ̀`scp src/syscalls.h root@$ip:$pathSched`
     echo ̀`scp src/syscall_table_32.S root@$ip:~/data/linux-2.6.30-ise/arch/x86/kernel/`
     echo ̀`scp src/unistd_32.h root@$ip:~/data/linux-2.6.30-ise/arch/x86/include/asm`
   fi
   if [ $1 == 1 ];then
+    echo New_semaphore
     echo ̀`scp src/new_semaphore.c root@$ip:$pathKernel`
     echo ̀`scp src/mytest.c root@$ip:$pathKernel`
   fi
