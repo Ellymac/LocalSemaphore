@@ -78,14 +78,17 @@ SYSCALL_DEFINE1(sem_destroy, int, sid)
         return (EFAULT);
     }
     if (sid >= MAX_SEM){
-        /** erreur */
+        return (EFAULT);
     }
     t_sem *s = (p->lsem)->all_sem[sid];
     if (s == NULL){
         return (EFAULT);
     }
-    kfree(s->waitlist);
-    kfree(s);
+    t_waitlist *waitlist = s->waitlist;
+    if (waitlist != NULL){
+        vfree(waitlist);
+    }
+    vfree(s);
     return 0;
 }
 
