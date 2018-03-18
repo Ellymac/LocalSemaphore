@@ -4,6 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "sys.h"
+
 int main(int argc, char* argv) {
   int sem, nbWaiting;
 

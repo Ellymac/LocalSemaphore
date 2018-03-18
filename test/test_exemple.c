@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "sys.h"
+
 int main(int argc, char *argv[]){
     int v = atoi(argv[1]);
     int statut = 0;
