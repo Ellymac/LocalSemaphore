@@ -136,9 +136,9 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
                     else{
                         (s->waitlist)->tabproc[bottom] = current;
                         (s->waitlist)->bottom = ((s->waitlist)->bottom + 1)%1001;
-                        /*s->waitlist[s->nb_elt_proc] = current;
                         s->nb_elt_proc++;
-                        mysleep();*/
+                        current->state = TASK_INTERRUPTIBLE;
+                        schedule();
                     }
                 }
                 else
@@ -185,8 +185,8 @@ SYSCALL_DEFINE1(sem_release, int, id)
                 else if (s->nb_elt_proc > 0)
                 {
                     (s->nb_elt_proc)--;
+                    wake_up_process((s->waitlist)->tabproc[(s->waitlist)->top]);
                     (s->waitlist)->top = ((s->waitlist)->top + 1)%1001;
-                    //wake_up_process(sleeping);
                 }
                 else
                 {
