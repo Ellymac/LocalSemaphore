@@ -26,6 +26,13 @@ if [ $# -ge 1 ];then
     echo `scp test/*.c root@$ip:$pathTest`
     echo `scp test/*.h root@$ip:$pathTest`
   fi
+  if [ $1 == 3 ];then
+    echo Exit et Fork
+    echo ̀`scp src/fork.c root@$ip:$pathKernel`
+    echo ̀`scp src/exit.c root@$ip:$pathKernel`
+  fi
+
+
 else
   echo False
 fi
