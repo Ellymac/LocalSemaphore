@@ -1410,8 +1410,6 @@ long do_fork(unsigned long clone_flags,
 				(p->lsem)->all_sem[i] = (current->lsem)->all_sem[i];
 			}
 		}
-		(p->lsem)->all_sem = vmalloc(sizeof(struct t_sem_ens));
-		(current->lsem)->all_sem;
 
 		if (clone_flags & CLONE_PARENT_SETTID)
 			put_user(nr, parent_tidptr);
