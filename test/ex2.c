@@ -10,13 +10,13 @@ int main(int argc, char* argv) {
   int sem, status, pid1, nbWaiting;
 
   // init semaphore
-  if(sem = syscall(337,2) == -1) {
+  if(sem = syscall(337,1) == -1) {
     perror("sem_initialize");
     exit(1);
   }
 
   // fork
-  if(pid1 = fork() == -1) {
+  if((pid1 = fork()) == -1) {
     perror("fork");
     exit(1);
   }
@@ -36,7 +36,7 @@ int main(int argc, char* argv) {
       exit(1);
     }
     else
-      printf("Number of process in waitinglist : %d\n", nbWaiting);
+      printf("Child : number of process in waitinglist : %d\n", nbWaiting);
 
     // release semaphore
     if(syscall(340,sem) != -1)
@@ -56,7 +56,7 @@ int main(int argc, char* argv) {
   }
   else {
     // pere
-    sleep(3); // waiting to be sure child will acquire first
+    sleep(1); // waiting to be sure child will acquire first
 
     // acquire semaphore
     if(syscall(339,sem) != -1)
