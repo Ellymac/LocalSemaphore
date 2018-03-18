@@ -892,17 +892,24 @@ NORET_TYPE void do_exit(long code)
 	int group_dead;
 
 	/** Destroy lsem **/
-	int i;
+	if(tsk->lsem != NULL) {
+		int i;
 
-	for (i = 0; i < MAX_SEM ; i++){
-		if ((tsk->lsem)->all_sem[i] != NULL){
-			((current->lsem)->all_sem[i])->count_ref--;
-			if (((current->lsem)->all_sem[i])->count_ref == 0){
-				vfree(((current->lsem)->all_sem[i])->waitlist);
-				vfree((current->lsem)->all_sem[i]);
+		for (i = 0; i < MAX_SEM ; i++){
+			if ((tsk->lsem)->all_sem[i] != NULL){
+				((current->lsem)->all_sem[i])->count_ref--;
+				if (((current->lsem)->all_sem[i])->count_ref == 0){
+					if((current->lsem)->all_sem[i] != NULL && ((current->lsem)->all_sem[i])->waitlist != NULL) {
+						vfree(((current->lsem)->all_sem[i])->waitlist);
+						vfree((current->lsem)->all_sem[i]);
+						((current->lsem)->all_sem[i])->waitlist = NULL;
+						(current->lsem)->all_sem[i] = NULL;
+					}
+				}
 			}
+			vfree(tsk->lsem);
+			tsk->lsem = NULL;
 		}
-		vfree(tsk->lsem);
 	}
 
 	profile_task_exit(tsk);

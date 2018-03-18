@@ -1260,6 +1260,18 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 		attach_pid(p, PIDTYPE_PID, pid);
 		nr_threads++;
 	}
+	/** Recreate lsem */
+	if(current->lsem != NULL) {
+		p->lsem = vmalloc(sizeof(struct t_sem_ens));
+		(p->lsem)->nb_sem = (current->lsem)->nb_sem;
+		int i;
+		for (i = 0 ; i < (p->lsem)->nb_sem; i++){
+			if ((p->lsem)->all_sem[i] != NULL){
+				((p->lsem)->all_sem[i])->count_ref++;
+				(p->lsem)->all_sem[i] = (current->lsem)->all_sem[i];
+			}
+		}
+	}
 
 	total_forks++;
 	spin_unlock(&current->sighand->siglock);
@@ -1400,16 +1412,7 @@ long do_fork(unsigned long clone_flags,
 
 		nr = task_pid_vnr(p);
 
-		/** Recreate lsem */
-		p->lsem = vmalloc(sizeof(struct t_sem_ens));
-		(p->lsem)->nb_sem = (current->lsem)->nb_sem;
-		int i;
-		for (i = 0 ; i < MAX_SEM ; i++){
-			if ((current->lsem)->all_sem[i] != NULL){
-				((current->lsem)->all_sem[i])->count_ref++;
-				(p->lsem)->all_sem[i] = (current->lsem)->all_sem[i];
-			}
-		}
+
 
 		if (clone_flags & CLONE_PARENT_SETTID)
 			put_user(nr, parent_tidptr);
