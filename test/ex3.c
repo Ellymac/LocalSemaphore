@@ -12,7 +12,7 @@ int main(int argc, char* argv) {
   printf("Initial value is %d\n", criticalValue);
 
   // init semaphore
-  if(sem = sem_initialize() == -1) {
+  if(sem = syscall(337,2) == -1) {
     perror("sem_initialize");
     exit(1);
   }
@@ -24,11 +24,21 @@ int main(int argc, char* argv) {
   }
   if(pid1 == 0){
     // fils 1
-    sem_acquire(sem);
-    write(1,"fils 1 increments value\n",24);
+    // acquire semaphore
+    if(syscall(339,sem) != -1)
+      printf("Semaphore %d was acquired by child 1\n", sem);
+    else
+      perror("sem_acquire call");
+
+    printf("Child 1 increments value\n");
     for(i = 0; i < 1000; i++)
       criticalValue += 1;
-    sem_release(sem);
+
+    // release semaphore
+    if(syscall(340,sem) != -1)
+      printf("Semaphore %d was released by child 1\n", sem);
+    else
+      perror("sem_release call");
     exit(0);
   }
 
@@ -44,30 +54,62 @@ int main(int argc, char* argv) {
     }
     if(pid3 == 0) {
       // fils 3
-      sem_acquire(sem);
-      write(1,"fils 3 decrements value\n",24);
+      // acquire semaphore
+      if(syscall(339,sem) != -1)
+        printf("Semaphore %d was acquired by child 3\n", sem);
+      else
+        perror("sem_acquire call");
+
+      printf("Child 3 increments value\n");
       for(i = 0; i < 1000; i++)
         criticalValue -= 1;
-      sem_release(sem);
+
+      // release semaphore
+      if(syscall(340,sem) != -1)
+        printf("Semaphore %d was released by child 3\n", sem);
+      else
+        perror("sem_release call");
+
       exit(0);
     }
     else {
       // fils 2
-      sem_acquire(sem);
-      write(1,"fils 2 increments value\n",24);
+      // acquire semaphore
+      if(syscall(339,sem) != -1)
+        printf("Semaphore %d was acquired by child 2\n", sem);
+      else
+        perror("sem_acquire call");
+
+      printf("Child 2 increments value\n");
       for(i = 0; i < 1000; i++)
         criticalValue += 1;
-      sem_release(sem);
+
+      // release semaphore
+      if(syscall(340,sem) != -1)
+        printf("Semaphore %d was released by child 2\n", sem);
+      else
+        perror("sem_release call");
+
       exit(0);
     }
   }
 
   // pere
-  sem_acquire(sem);
-  write(1,"pere decrements value\n",22);
+  // acquire semaphore
+  if(syscall(339,sem) != -1)
+    printf("Semaphore %d was acquired by parent\n", sem);
+  else
+    perror("sem_acquire call");
+
+  printf("Parent decrements value\n");
   for(i = 0; i < 1000; i++)
     criticalValue -= 1;
-  sem_release(sem);
+
+  // release semaphore
+  if(syscall(340,sem) != -1)
+    printf("Semaphore %d was released by parent\n", sem);
+  else
+    perror("sem_release call");
 
   // waiting for children
   wait(&status);
@@ -76,3 +118,4 @@ int main(int argc, char* argv) {
   // print final critical value
   printf("Final value is %d\n", criticalValue);
   return 0;
+}
