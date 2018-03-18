@@ -36,18 +36,18 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
 
   //init lsem
   if (p->lsem == NULL){
-      p->lsem = kmalloc(1,sizeof(struct t_sem_ens));
+      p->lsem = vmalloc(sizeof(struct t_sem_ens));
       (p->lsem)->nb_sem = 0;
   }
   sem_ens = p->lsem;
 
   // init s
-  s = kmalloc(1,sizeof(t_sem));
+  s = vmalloc(sizeof(t_sem));
   s->nb_max = nb;
   s->nb_available = nb;
 
   // waitlist
-  waitlist = kmalloc(1,sizeof(t_waitlist));
+  waitlist = vmalloc(sizeof(t_waitlist));
   waitlist->top = 0;
   waitlist->bottom = 0;
 
@@ -75,22 +75,35 @@ SYSCALL_DEFINE1(sem_destroy, int, sid)
 {
     p = current;
     if (p->lsem == NULL){
+        printk("lsem\n");
         return (EFAULT);
     }
     if (sid >= MAX_SEM){
+        printk("max_sem\n");
         return (EFAULT);
     }
     t_sem *s = (p->lsem)->all_sem[sid];
     if (s == NULL){
+        printk("sem\n");
         return (EFAULT);
     }
     if (s->waitlist != NULL){
-        kfree(s->waitlist);
+        printk("waitlist\n");
+        vfree(s->waitlist);
+        s->waitlist = NULL;
     }
-    kfree(s);
-    if (s != NULL){
-        printk(KERN_DEBUG "La désallocation n'a pas fonctionné\n");
+    if (s->waitlist != NULL)
+    {
+        printk("la désallocation de waitlist n'a pas fonctionné\n");
     }
+    vfree((p->lsem)->all_sem[sid]);
+    (p->lsem)->all_sem[sid] = NULL;
+    if ((p->lsem)->all_sem[sid] != NULL)
+    {
+        printk("la désallocation n'a pas fonctionné\n");
+    }
+
+
     return 0;
 }
 
