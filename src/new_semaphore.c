@@ -89,7 +89,7 @@ SYSCALL_DEFINE1(sem_destroy, int, sid)
     }
     kfree(s);
     if (s != NULL){
-        printk("la désallocation n'a pas fonctionné\n");
+        printk(KERN_DEBUG "La désallocation n'a pas fonctionné\n");
     }
     return 0;
 }
@@ -98,7 +98,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
     p = current;
     t_sem_ens *sem_ens = p->lsem;
     if (sem_ens == NULL){
-        printk("sem_ens\n");
+        printk(KERN_DEBUG "sem_ens\n");
         return (EFAULT);
     }
     else{
@@ -108,7 +108,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
             {
-                printk("sem\n");
+                printk(KERN_DEBUG "sem\n");
                 return (EFAULT);
             }
             else
@@ -136,7 +136,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
         }
         else
         {
-            printk("id\n");
+            printk(KERN_DEBUG "id\n");
             return (EFAULT);
         }
     }
@@ -191,27 +191,31 @@ SYSCALL_DEFINE1(sem_release, int, id)
 SYSCALL_DEFINE1(sem_dbg, int, id){
     p = current;
     if (p->lsem == NULL){
+      printk(KERN_DEBUG "error : p->lsem == NULL\n");
         return (EFAULT);
     }
     if (id >= MAX_SEM){
+      printk(KERN_DEBUG "error : id >= MAX_SEM\n");
         return (EFAULT);
     }
     if ((p->lsem)->all_sem[id] == NULL){
+      printk(KERN_DEBUG "error : p->lsem->all_sem[id]== NULL\n");
         return (EFAULT);
     }
     t_sem *s = (p->lsem)->all_sem[id];
-    printk("id : %d\n", s->id);
-    printk("nb_max : %d\n", s->nb_max);
-    printk("nb_available : %d\n", s->nb_available);
+    printk(KERN_DEBUG "***** Semaphore with id %d *****\n", s->id);
+    printk(KERN_DEBUG "nb_max : %d\n", s->nb_max);
+    printk(KERN_DEBUG "nb_available : %d\n", s->nb_available);
     int i;
     t_waitlist *w = s->waitlist;
     if (w == NULL){
+      printk(KERN_DEBUG "error : w == NULL\n");
         return (EFAULT);
     }
     for (i = w->top ; i != w->bottom ; i = (i+1)%1001){
-        printk("pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
+        printk(KERN_DEBUG "pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
     }
-    printk("nb_elt_proc : %d\n", s->nb_elt_proc);
-    printk("count_ref : %d\n", s->count_ref);
-    return 0;
+    printk(KERN_DEBUG "nb_elt_proc : %d\n", s->nb_elt_proc);
+    printk(KERN_DEBUG "count_ref : %d\n\n", s->count_ref);
+    return s->nb_elt_proc;
 }

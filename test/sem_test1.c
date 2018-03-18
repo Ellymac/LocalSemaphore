@@ -6,18 +6,28 @@
 int main(int argc, char *argv[])
 {
     int result = 0;
+    int res;
     if((result = syscall(337,2)) != -1)
-        printf("Sem id : %d\n", result);
+      if((res = syscall(341, result)) != -1)
+        printf("nb waiting = %d\n", res);
+      else
+        perror("sem_debug call");  
     else
-        perror("sem_initialize call");
+      perror("sem_initialize call");
     if ((result = syscall(337, 2)) != -1)
-        printf("Sem id : %d\n", result);
+      if((res = syscall(341, result)) != -1)
+        printf("nb waiting = %d\n", res);
+      else
+        perror("sem_debug call");
     else
-        perror("sem_initialize call");
+      perror("sem_initialize call");
     if ((result = syscall(337, 2)) != -1)
-        printf("Sem id : %d\n", result);
+      if((res = syscall(341, result)) != -1)
+        printf("nb waiting = %d\n", res);
+      else
+        perror("sem_debug call");
     else
-        perror("sem_initialize call");
+      perror("sem_initialize call");
 
     /*  if((result = syscall(338,2)) != -1)
         printf("Sem destroy : %d\n", result);
