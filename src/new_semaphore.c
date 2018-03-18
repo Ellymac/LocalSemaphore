@@ -36,18 +36,18 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
 
   //init lsem
   if (p->lsem == NULL){
-      p->lsem = vmalloc(sizeof(struct t_sem_ens));
+      p->lsem = kmalloc(1,sizeof(struct t_sem_ens));
       (p->lsem)->nb_sem = 0;
   }
   sem_ens = p->lsem;
 
   // init s
-  s = vmalloc(sizeof(t_sem));
+  s = kmalloc(1,sizeof(t_sem));
   s->nb_max = nb;
   s->nb_available = nb;
 
   // waitlist
-  waitlist = vmalloc(sizeof(t_waitlist));
+  waitlist = kmalloc(1,sizeof(t_waitlist));
   waitlist->top = 0;
   waitlist->bottom = 0;
 
@@ -84,11 +84,13 @@ SYSCALL_DEFINE1(sem_destroy, int, sid)
     if (s == NULL){
         return (EFAULT);
     }
-    t_waitlist *waitlist = s->waitlist;
-    if (waitlist != NULL){
-        vfree(waitlist);
+    if (s->waitlist != NULL){
+        kfree(s->waitlist);
     }
-    vfree(s);
+    kfree(s);
+    if (s != NULL){
+        printk("la désallocation n'a pas fonctionné\n");
+    }
     return 0;
 }
 
