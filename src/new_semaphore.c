@@ -33,7 +33,6 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
   t_sem_ens *sem_ens;
   t_waitlist *waitlist;
   p = current;
-  waitlist = s->waitlist;
 
   //init lsem
   if (p->lsem == NULL){
@@ -51,6 +50,8 @@ SYSCALL_DEFINE1(sem_initialize, int, nb)
   waitlist = vmalloc(sizeof(t_waitlist));
   waitlist->top = 0;
   waitlist->bottom = 0;
+
+  s->waitlist = waitlist;
 
   s->nb_elt_proc = 0; // empty waitlist
 
@@ -182,13 +183,13 @@ SYSCALL_DEFINE1(sem_release, int, id)
 SYSCALL_DEFINE1(sem_dbg, int, id){
     p = current;
     if (p->lsem == NULL){
-        /*** erreur */
+        return (EFAULT);
     }
     if (id >= MAX_SEM){
-        /** erreur */
+        return (EFAULT);
     }
     if ((p->lsem)->all_sem[id] == NULL){
-        /** erreur */
+        return (EFAULT);
     }
     t_sem *s = (p->lsem)->all_sem[id];
     printk("id : %d\n", s->id);
@@ -196,9 +197,13 @@ SYSCALL_DEFINE1(sem_dbg, int, id){
     printk("nb_available : %d\n", s->nb_available);
     int i;
     t_waitlist *w = s->waitlist;
+    if (w == NULL){
+        return (EFAULT);
+    }
     for (i = w->top ; i != w->bottom ; i = (i+1)%1001){
         printk("pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
     }
     printk("nb_elt_proc : %d\n", s->nb_elt_proc);
     printk("count_ref : %d\n", s->count_ref);
+    return 0;
 }
