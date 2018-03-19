@@ -229,6 +229,7 @@ SYSCALL_DEFINE1(sem_dbg, int, id){
         printk(KERN_DEBUG "pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
     }
     printk(KERN_DEBUG "nb_elt_proc : %d\n", s->nb_elt_proc);
-    printk(KERN_DEBUG "count_ref : %d\n\n", s->count_ref);
+    printk(KERN_DEBUG "count_ref : %d\n", s->count_ref);
+    printk(KERN_DEBUG "nb_sem : %d\n\n", (p->lsem)->nb_sem);
     return s->nb_elt_proc;
 }
