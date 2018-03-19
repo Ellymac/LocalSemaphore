@@ -984,8 +984,9 @@ NORET_TYPE void do_exit(long code)
 			}
 		}
 		if (n == MAX_SEM){
-			vfree(tsk->lsem);
+			
 		}
+		vfree(tsk->lsem);
 		tsk->lsem = NULL;
 	}
 	exit_sem(tsk);
