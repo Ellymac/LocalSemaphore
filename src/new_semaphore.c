@@ -121,7 +121,7 @@ SYSCALL_DEFINE1(sem_acquire, int, id){
             t_sem *s = sem_ens->all_sem[id];
             if (s == NULL)
             {
-                printk(KERN_DEBUG "sem\n");
+                printk(KERN_DEBUG "acquire sem\n");
                 return (EFAULT);
             }
             else
