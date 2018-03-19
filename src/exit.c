@@ -966,25 +966,22 @@ NORET_TYPE void do_exit(long code)
 	if(tsk->lsem != NULL) {
 		int i;
 		int n = 0;
-		for (i = 0; i < MAX_SEM ; i++){
+		for (i = 0; i < (tsk->lsem)->nb_sem ; i++){
 			if ((tsk->lsem)->all_sem[i] != NULL){
 				((tsk->lsem)->all_sem[i])->count_ref--;
 				if (((tsk->lsem)->all_sem[i])->count_ref == 0){
 					if(((tsk->lsem)->all_sem[i])->waitlist != NULL) {
 						vfree(((tsk->lsem)->all_sem[i])->waitlist);
-						vfree((tsk->lsem)->all_sem[i]);
 						((tsk->lsem)->all_sem[i])->waitlist = NULL;
-						(tsk->lsem)->all_sem[i] = NULL;
 					}
+					vfree((tsk->lsem)->all_sem[i]);
+					(tsk->lsem)->all_sem[i] = NULL;
 					n++;
 				}
 			}
 			else{
 				n++;
 			}
-		}
-		if (n == MAX_SEM){
-			
 		}
 		vfree(tsk->lsem);
 		tsk->lsem = NULL;
