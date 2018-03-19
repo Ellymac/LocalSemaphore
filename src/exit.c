@@ -978,9 +978,9 @@ NORET_TYPE void do_exit(long code)
 					}
 				}
 			}
-			vfree(tsk->lsem);
-			tsk->lsem = NULL;
 		}
+		vfree(tsk->lsem);
+		tsk->lsem = NULL;
 	}
 	exit_sem(tsk);
 	exit_files(tsk);
