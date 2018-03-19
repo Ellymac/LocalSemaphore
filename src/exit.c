@@ -965,7 +965,7 @@ NORET_TYPE void do_exit(long code)
 	/** Destroy lsem **/
 	if(tsk->lsem != NULL) {
 		int i;
-
+		int n = 0;
 		for (i = 0; i < MAX_SEM ; i++){
 			if ((tsk->lsem)->all_sem[i] != NULL){
 				((tsk->lsem)->all_sem[i])->count_ref--;
@@ -976,11 +976,17 @@ NORET_TYPE void do_exit(long code)
 						((tsk->lsem)->all_sem[i])->waitlist = NULL;
 						(tsk->lsem)->all_sem[i] = NULL;
 					}
+					n++;
 				}
 			}
-			vfree(tsk->lsem);
-			tsk->lsem = NULL;
+			else{
+				n++;
+			}
 		}
+		if (n == MAX_SEM){
+			vfree(tsk->lsem);
+		}
+		tsk->lsem = NULL;
 	}
 	exit_sem(tsk);
 	exit_files(tsk);

@@ -1265,9 +1265,9 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 		p->lsem = vmalloc(sizeof(struct t_sem_ens));
 		(p->lsem)->nb_sem = (current->lsem)->nb_sem;
 		int i;
-		for (i = 0 ; i < (p->lsem)->nb_sem; i++){
-			if ((p->lsem)->all_sem[i] != NULL){
-				((p->lsem)->all_sem[i])->count_ref++;
+		for (i = 0 ; i < MAX_SEM; i++){
+			if ((current->lsem)->all_sem[i] != NULL){
+				((current->lsem)->all_sem[i])->count_ref++;
 				(p->lsem)->all_sem[i] = (current->lsem)->all_sem[i];
 			}
 		}
