@@ -1,6 +1,6 @@
 #include <unistd.h>
 
-static inline long sem_intinialize(int nb){
+static inline long sem_initialize(int nb){
     return syscall(337,nb);
 }
 

@@ -10,7 +10,7 @@ int main(int argc, char* argv) {
   int sem, status, pid1, nbWaiting;
 
   // init semaphore
-  if(sem = syscall(337,1) == -1) {
+  if(sem = sem_initialize(1) == -1) {
     perror("sem_initialize");
     exit(1);
   }
@@ -23,34 +23,34 @@ int main(int argc, char* argv) {
   if(pid1 == 0){
     // fils 1
     // acquire semaphore
-    if(syscall(339,sem) != -1)
-      printf("Semaphore %d was acquired by child\n", sem);
+    if(sem_acquire(sem) != -1)
+      printf("Semaphore %d was acquired by child %d\n", sem, getpid());
     else
       perror("sem_acquire call");
 
     sleep(2); // waiting for parent to acquire too
 
     // debug -> parent is in the waitlist
-    if(nbWaiting = syscall(341, sem) == -1) {
+    if((nbWaiting = sem_dbg(sem)) == -1) {
       perror("sem_debug");
       exit(1);
     }
     else
-      printf("Child : number of process in waitinglist : %d\n", nbWaiting);
+      printf("(child acquire) Nb process in waitinglist : %d\n\n", nbWaiting);
 
     // release semaphore
-    if(syscall(340,sem) != -1)
-      printf("Semaphore %d was released by child\n", sem);
+    if(sem_release(sem) != -1)
+      printf("Semaphore %d was released by child %d\n", sem, getpid());
     else
       perror("sem_release call");
 
     // debug -> empty waitlist, no free resource
-    if(nbWaiting = syscall(341, sem) == -1) {
+    if((nbWaiting = sem_dbg(sem)) == -1) {
       perror("sem_debug");
       exit(1);
     }
     else
-      printf("Number of process in waitinglist : %d\n", nbWaiting);
+      printf("(child release) Nb process in waitinglist : %d\n\n", nbWaiting);
 
     exit(0);
   }
@@ -59,26 +59,34 @@ int main(int argc, char* argv) {
     sleep(1); // waiting to be sure child will acquire first
 
     // acquire semaphore
-    if(syscall(339,sem) != -1)
-      printf("Semaphore %d was acquired by parent\n", sem);
+    if(sem_acquire(sem) != -1)
+      printf("Semaphore %d was acquired by parent %d\n", sem, getpid());
     else
       perror("sem_acquire call");
 
-    wait(&status); // waiting for child
-
-    // release semaphore
-    if(syscall(340,sem) != -1)
-      printf("Semaphore %d was released by parent\n", sem);
-    else
-      perror("sem_release call");
-
-    // debug -> waitlist empty, 1 free resource
-    if(nbWaiting = syscall(341, sem) == -1) {
+    // debug -> empty waitlist, no free resource
+    if((nbWaiting = sem_dbg(sem)) == -1) {
       perror("sem_debug");
       exit(1);
     }
     else
-      printf("Number of process in waitinglist : %d\n", nbWaiting);
+      printf("(parent acquire) Nb process in waitinglist : %d\n\n", nbWaiting);
+
+    wait(&status); // waiting for child
+
+    // release semaphore
+    if(sem_release(sem) != -1)
+      printf("Semaphore %d was released by parent %d\n", sem, getpid());
+    else
+      perror("sem_release call");
+
+    // debug -> waitlist empty, 1 free resource
+    if((nbWaiting = sem_dbg(sem)) == -1) {
+      perror("sem_debug");
+      exit(1);
+    }
+    else
+      printf("(parent release) Nb process in waitinglist : %d\n\n", nbWaiting);
   }
   return 0;
 }

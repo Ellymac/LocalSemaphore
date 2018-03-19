@@ -205,31 +205,31 @@ SYSCALL_DEFINE1(sem_dbg, int, id){
     p = current;
     if (p->lsem == NULL){
       printk(KERN_DEBUG "error : p->lsem == NULL\n");
-        return (EFAULT);
+      return (EFAULT);
     }
     if (id >= MAX_SEM){
       printk(KERN_DEBUG "error : id >= MAX_SEM\n");
-        return (EFAULT);
+      return (EFAULT);
     }
     if ((p->lsem)->all_sem[id] == NULL){
       printk(KERN_DEBUG "error : p->lsem->all_sem[id]== NULL\n");
-        return (EFAULT);
+      return (EFAULT);
     }
     t_sem *s = (p->lsem)->all_sem[id];
-    printk(KERN_DEBUG "***** Semaphore with id %d *****\n", s->id);
+    printk(KERN_DEBUG "\n***** Semaphore with id %d *****\n", s->id);
     printk(KERN_DEBUG "nb_max : %d\n", s->nb_max);
     printk(KERN_DEBUG "nb_available : %d\n", s->nb_available);
     int i;
     t_waitlist *w = s->waitlist;
     if (w == NULL){
       printk(KERN_DEBUG "error : w == NULL\n");
-        return (EFAULT);
+      return (EFAULT);
     }
     for (i = w->top ; i != w->bottom ; i = (i+1)%1001){
         printk(KERN_DEBUG "pid_proc %d : %d\n", i, (w->tabproc[i])->pid);
     }
     printk(KERN_DEBUG "nb_elt_proc : %d\n", s->nb_elt_proc);
     printk(KERN_DEBUG "count_ref : %d\n", s->count_ref);
-    printk(KERN_DEBUG "nb_sem : %d\n\n", (p->lsem)->nb_sem);
+    printk(KERN_DEBUG "nb_sem : %d\n", (p->lsem)->nb_sem);
     return s->nb_elt_proc;
 }

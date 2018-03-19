@@ -17,7 +17,7 @@ int main(int argc, char* argv) {
   printf("Initial value is %d\n", *criticalValue);
 
   // init semaphore
-  if(sem = syscall(337,1) == -1) {
+  if(sem = sem_initialize(1) == -1) {
     perror("sem_initialize");
     exit(1);
   }
@@ -30,7 +30,7 @@ int main(int argc, char* argv) {
   if(pid1 == 0){
     // fils 1
     // acquire semaphore
-    if(syscall(339,sem) != -1)
+    if(sem_acquire(sem) != -1)
       printf("Semaphore %d was acquired by child 1\n", sem);
     else
       perror("sem_acquire call");
@@ -41,7 +41,7 @@ int main(int argc, char* argv) {
     printf("Value is %d\n", *criticalValue);
 
     // release semaphore
-    if(syscall(340,sem) != -1)
+    if(sem_release(sem) != -1)
       printf("Semaphore %d was released by child 1\n", sem);
     else
       perror("sem_release call");
@@ -57,7 +57,7 @@ int main(int argc, char* argv) {
     {
       // fils 2
       // acquire semaphore
-      if (syscall(339, sem) != -1)
+      if (sem_acquire(sem) != -1)
         printf("Semaphore %d was acquired by child 2\n", sem);
       else
         perror("sem_acquire call");
@@ -68,7 +68,7 @@ int main(int argc, char* argv) {
       printf("Value is %d\n", *criticalValue);
 
       // release semaphore
-      if (syscall(340, sem) != -1)
+      if (sem_release(sem) != -1)
         printf("Semaphore %d was released by child 2\n", sem);
       else
         perror("sem_release call");
@@ -85,7 +85,7 @@ int main(int argc, char* argv) {
       {
         // fils 3
         // acquire semaphore
-        if (syscall(339, sem) != -1)
+        if (sem_acquire(sem) != -1)
           printf("Semaphore %d was acquired by child 3\n", sem);
         else
           perror("sem_acquire call");
@@ -96,7 +96,7 @@ int main(int argc, char* argv) {
         printf("Value is %d\n", *criticalValue);
 
         // release semaphore
-        if (syscall(340, sem) != -1)
+        if (sem_release(sem) != -1)
           printf("Semaphore %d was released by child 3\n", sem);
         else
           perror("sem_release call");
@@ -106,7 +106,7 @@ int main(int argc, char* argv) {
       else{
         // pere
         // acquire semaphore
-        if (syscall(339, sem) != -1)
+        if (sem_acquire(sem) != -1)
           printf("Semaphore %d was acquired by parent\n", sem);
         else
           perror("sem_acquire call");
@@ -122,7 +122,7 @@ int main(int argc, char* argv) {
         printf("Value is %d\n", *criticalValue);
 
         // release semaphore
-        if (syscall(340, sem) != -1)
+        if (sem_release(sem) != -1)
           printf("Semaphore %d was released by parent\n", sem);
         else
           perror("sem_release call");
@@ -134,7 +134,7 @@ int main(int argc, char* argv) {
     }
   }
 
-  
+
 
   return 0;
 }
